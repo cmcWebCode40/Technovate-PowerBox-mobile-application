@@ -54,6 +54,7 @@ export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
   useEffect(() => {
     (async () => {
       try {
+        setIsLoadingSession(true);
         const session = await getFromAsyncStore<User>(USER_SESSION);
         if (session) {
           setUser(session);

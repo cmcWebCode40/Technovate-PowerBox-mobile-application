@@ -14,7 +14,8 @@ import {
 } from '@/libs/utils';
 import {useAuthContext} from '@/libs/context';
 import {Formik} from 'formik';
-import AppLogo from '../../assets/images/power_box_logo.webp'
+import AppLogo from '../../assets/images/power_box_logo.webp';
+import {Spinner} from '@/components/common/loader/index.';
 
 export const SignInSchema = Yup.object().shape({
   email: Yup.string().required('Email is required!').trim(),
@@ -25,13 +26,13 @@ const USER_EMAIL = 'technovate.dev@gmail.com';
 const USER_PASSWORD = 'Dev123';
 
 const formInitialValues = {
-  email: USER_EMAIL,
-  password: USER_PASSWORD,
+  email: '',
+  password: '',
 };
 
 export const SignInScreen: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const {updateUser} = useAuthContext();
+  const {updateUser, isLoadingSession} = useAuthContext();
   const style = useThemedStyles(styles);
 
   const handleLogin = async (payload: typeof formInitialValues) => {
@@ -55,10 +56,18 @@ export const SignInScreen: React.FunctionComponent = () => {
     await saveToAsyncStore(USER_SESSION, user);
     updateUser(user);
   };
+
+  if (isLoadingSession) {
+    return (
+      <View style={style.container}>
+        <Spinner loading />
+      </View>
+    );
+  }
   return (
     <View style={style.container}>
       <View style={style.header}>
-        <Image source={AppLogo}/>
+        <Image source={AppLogo} />
       </View>
       <Formik
         enableReinitialize={true}
@@ -124,7 +133,7 @@ const styles = ({colors, fontSize, fonts}: Theme) => {
     header: {
       flexDirection: 'row',
       justifyContent: 'center',
-      alignItems:'center',
+      alignItems: 'center',
       marginBottom: pixelSizeVertical(24),
     },
     title: {

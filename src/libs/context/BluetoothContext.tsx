@@ -108,10 +108,11 @@ export const BluetoothContextProvider: React.FunctionComponent<
     SCK0001: undefined,
   });
 
-  const REFETCH_INTERVAL = 1000 * 20;
+  const REFETCH_INTERVAL = 1000 * 1.5;
+
 
   useEffect(() => {
-    setInterval(() => {
+   const handler = setInterval(() => {
       (async () => {
         try {
           const response = await axios.get<EnergyMetricResponse>(
@@ -135,7 +136,11 @@ export const BluetoothContextProvider: React.FunctionComponent<
           Alert.alert('Error occurred');
         }
       })();
-    },REFETCH_INTERVAL );
+    }, REFETCH_INTERVAL);
+
+    return () =>{
+      clearInterval(handler);
+    };
 
   }, [REFETCH_INTERVAL]);
 

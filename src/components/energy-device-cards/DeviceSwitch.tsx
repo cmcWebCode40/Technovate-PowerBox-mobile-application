@@ -61,7 +61,7 @@ export const DeviceSwitch: React.FunctionComponent<DeviceSwitchProps> = ({ color
         testID="power-supply-button"
       >
         <Animated.View style={[styles.switchContainer, animateStyle]}>
-          {isLoading ? <Spinner loading /> : <PowerSupplyIcon color={color} />}
+          {isLoading ? <Spinner loading /> : <PowerSupplyIcon color={color}  size={40} />}
         </Animated.View>
       </TouchableWithoutFeedback>
     </View>
@@ -74,9 +74,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   switchContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 999,
     backgroundColor: colors.white[100],
     justifyContent: 'center',
     alignItems: 'center',

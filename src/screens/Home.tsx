@@ -23,12 +23,11 @@ import {useBluetoothContext} from '@/libs/context';
 import WaveBg from 'assets/images/wave_img.jpg';
 import {Button, Modal, Typography} from '@/components/common';
 import {RechargeEnergyForm} from '@/components/recharge-energy-form';
-import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import {colors} from '@/libs/constants';
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
 import { DeviceSwitch } from '@/components/energy-device-cards/DeviceSwitch';
-import { LiquidGaugeProgress } from '@/components/energy-usage-progress-indicator/LiquidGaugeProgress';
+import { EnergyUsageProgressIndicator } from '@/components/energy-usage-progress-indicator';
 
 export const HomeScreen: React.FunctionComponent = () => {
   const style = useThemedStyles(styles);
@@ -45,9 +44,9 @@ export const HomeScreen: React.FunctionComponent = () => {
     // console.log('STATE', parseInt(energyMetric.ac_volt, 10));
   }, [energyMetric.ac_volt, energyMetric.state]);
 
-  console.log('=========energyMetric===========================');
-  console.log(energyMetric);
-  console.log('====================================');
+  // console.log('=========energyMetric===========================');
+  // console.log(energyMetric);
+  // console.log('====================================');
 
   const info: {type: DeviceInfoStatus; value: string}[] = [
     {
@@ -72,20 +71,18 @@ export const HomeScreen: React.FunctionComponent = () => {
     setOpenModal(true);
   };
 
-  const balanceInPercent =
-  energyMetric?.total_unit > 0
-    ? (energyMetric?.bal_unit / energyMetric?.total_unit) * 100
-    : 0;
-
 
   const switchDeviceState = async () => {
     const state = deviceState === 'ON' ? '0' : '1';
+    console.log('========state============================');
+    console.log(state);
+    console.log('====================================');
     try {
       setIsSwitching(true);
       const response = await axios.get(
         `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field7=${state}`,
       );
-      console.log('================response====================');
+      console.log('================switchDeviceState====================');
       console.log(response.data === 0, response.data);
       console.log('====================================');
       if (response.data <= 0) {
@@ -101,12 +98,11 @@ export const HomeScreen: React.FunctionComponent = () => {
   const rechargeMeter = async (unitValue: string) => {
     try {
       setIsRecharge(true);
-      console.log('unit', unitValue);
-      setUnit(unitValue)
+      setUnit(unitValue);
       const response = await axios.get(
         `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field8=${unit}`,
       );
-      console.log('================response====================');
+      console.log('================rechargeMeter====================');
       console.log(response.data === 0, response.data);
       console.log('====================================');
       if (response.data <= 0) {
@@ -118,7 +114,7 @@ export const HomeScreen: React.FunctionComponent = () => {
         setOpenModal(false);
         setUnit(undefined);
         showMessage({
-          message: `PowerBox Recharge of ${unitValue} units successfully made`,
+          message: 'PowerBox Recharge of units successfully made',
           type: 'success',
         });
       }
@@ -148,7 +144,7 @@ export const HomeScreen: React.FunctionComponent = () => {
               </View>
             </View>
             <View style={style.progressIndicatorContainer}>
-              <LiquidGaugeProgress size={200} value={balanceInPercent}/>
+              <EnergyUsageProgressIndicator balance={energyMetric.bal_unit} />
             </View>
             <View style={style.infoContainer}>
               {info.map((item, index) => (
@@ -159,7 +155,7 @@ export const HomeScreen: React.FunctionComponent = () => {
                 </View>
               ))}
             </View>
-            <DeviceSwitch isLoading={isSwitching} onSwitch={switchDeviceState} color={deviceState === 'ON'? colors.green[500] :colors.red[200]} />
+            <DeviceSwitch isLoading={isSwitching} onSwitch={switchDeviceState} color={deviceState === 'ON' ? colors.green[500] : colors.red[200]} />
             <View style={style.btnContainer}>
               <Button variant="contained" onPress={rechargeInverter}>
                 Recharge
@@ -257,7 +253,7 @@ const styles = (theme: Theme) => {
     },
     btnContainer: {
       marginBottom: pixelSizeVertical(32),
-      marginTop:pixelSizeVertical(24)
+      marginTop:pixelSizeVertical(24),
     },
   });
 };

@@ -21,7 +21,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
           voltage={energyMetric.ac_volt}
         />
         <View>
-          <EnergyUsageChart value={parseInt(energyMetric.consumption, 10)} />
+          <EnergyUsageChart value={parseInt(energyMetric.power, 10)} />
         </View>
       </ScrollView>
     </View>

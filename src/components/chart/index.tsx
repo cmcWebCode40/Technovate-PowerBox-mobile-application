@@ -15,10 +15,6 @@ export const EnergyUsageChart:React.FunctionComponent<EnergyUsageChartProps> = (
   const [lineData, setLineData] = useState([{ value: 0 }]);
   const style = useThemedStyles(styles);
 
-  console.log('===============value=====================');
-  console.log(lineData);
-  console.log('====================================');
-
   useEffect(() => {
     const interval = setInterval(() => {
       const newConsumptionValue = value;
@@ -35,17 +31,22 @@ export const EnergyUsageChart:React.FunctionComponent<EnergyUsageChartProps> = (
   return (
     <View style={style.container}>
       <Typography style={style.text}>
-        EnergyConsumption
+        Energy Consumption
       </Typography>
        <LineChart
         data={lineData}
-        color={'#177AD5'}
+        color={colors.green[200]}
         thickness={3}
-        dataPointsColor={'red'}
+        dataPointsColor={colors.orange[500]}
         noOfSections={5}
         yAxisColor={colors.white[100]}
         rulesColor={colors.white[100]}
         xAxisColor={colors.white[100]}
+        areaChart
+        startFillColor="rgb(46, 217, 255)"
+        startOpacity={0.8}
+        endFillColor="rgb(203, 241, 250)"
+        endOpacity={0.3}
       />
     </View>
   );
