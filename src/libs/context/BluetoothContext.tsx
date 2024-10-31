@@ -133,7 +133,7 @@ export const BluetoothContextProvider: React.FunctionComponent<
             }));
           }
         } catch (error) {
-          Alert.alert('Error occurred');
+          console.error('Error occurred');
         }
       })();
     }, REFETCH_INTERVAL);
