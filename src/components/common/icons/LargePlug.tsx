@@ -4,7 +4,7 @@ import {SvgIconProps} from './type';
 import {theme} from '@/libs/config/theme';
 
 export const LargePlugIcon: React.FunctionComponent<SvgIconProps> = ({
-  color = theme.colors.orange[400],
+  color = theme.colors.blue[200],
   size = '91',
 }) => {
   return (
