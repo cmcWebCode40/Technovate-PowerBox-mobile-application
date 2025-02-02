@@ -16,3 +16,9 @@ export type RootStackScreens = {
     SignIn: undefined;
   };
 };
+
+export type AuthStackScreens = {
+  SignIn: undefined;
+  SignUp: undefined;
+  Welcome:undefined
+};

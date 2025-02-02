@@ -2,13 +2,12 @@
 import React from 'react';
 import {Theme, theme as themes} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
-import {AccountScreen, DevicesScreen, HomeScreen} from '@/screens';
+import {AccountScreen, DevicesScreen, HomeScreen, TransactionScreen} from '@/screens';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {StyleSheet, TextStyle, View} from 'react-native';
 import {HomeIcon} from '@/components/common/icons/Home';
-import {AccountIcon, AddIcon, Typography} from '@/components/common';
+import {AccountIcon, AddIcon, TransactionIcon, Typography} from '@/components/common';
 import {heightPixel, pixelSizeVertical} from '@/libs/utils';
-import {Header} from '@/components/common/header';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,7 +16,7 @@ type TabBarLabelProps = {
 };
 
 export const Dashboard = () => {
-  const {tabBarStyle, container, header} = useThemedStyles(styles);
+  const {tabBarStyle, container} = useThemedStyles(styles);
   const tabLabelStyle = (focused: boolean): TextStyle => ({
     fontWeight: '600',
     fontSize: themes.fontSize.s,
@@ -36,9 +35,6 @@ export const Dashboard = () => {
 
   return (
     <View style={container}>
-      <View style={header}>
-        <Header />
-      </View>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -85,7 +81,14 @@ const tabs = [
     ),
   },
   {
-    name: 'Settings',
+    name: 'Transactions',
+    component: TransactionScreen,
+    icon: ({focused}: TabBarLabelProps) => (
+      <TransactionIcon size={'42'} color={updateIconColor(focused)} />
+    ),
+  },
+  {
+    name: 'Account',
     component: AccountScreen,
     icon: ({focused}: TabBarLabelProps) => (
       <AccountIcon color={updateIconColor(focused)} />
@@ -97,7 +100,7 @@ const styles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
-      paddingTop: pixelSizeVertical(20),
+      // paddingTop: pixelSizeVertical(20),
       backgroundColor: theme.colors.black[100],
     },
     tabBarStyle: {
