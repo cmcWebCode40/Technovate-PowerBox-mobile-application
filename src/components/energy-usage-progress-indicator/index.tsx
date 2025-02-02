@@ -56,7 +56,7 @@ const styles = (theme: Theme) => {
       borderRadius: theme.radius.full,
       backgroundColor: 'transparent',
       borderWidth:4,
-      borderColor:theme.colors.orange[500],
+      borderColor:theme.colors.orange[400],
       paddingHorizontal: pixelSizeHorizontal(20),
     },
     subTitle: {

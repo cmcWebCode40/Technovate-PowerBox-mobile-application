@@ -18,7 +18,7 @@ interface EnergyDeviceCardProps {
 export const EnergyDeviceCard: React.FunctionComponent<
   EnergyDeviceCardProps
 > = ({ state, power, voltage, balance}) => {
-  const {green, red} = colors;
+  const {green, red, blue} = colors;
   const mainStyle = useThemedStyles(styles);
 
   const isOnline = state === 'on';
@@ -45,7 +45,7 @@ export const EnergyDeviceCard: React.FunctionComponent<
           <Typography
             style={[
               mainStyle.statusText,
-              {color: isOnline ? green[600] : red[200]},
+              {color: isOnline ? green[600] : blue[200]},
             ]}>
             {'READING'}
           </Typography>
@@ -123,7 +123,7 @@ const styles = (theme: Theme) => {
     },
     caption: {
       marginTop: pixelSizeVertical(12),
-      color: theme.colors.gray[500],
+      color: theme.colors.blue[200],
       fontSize: fontPixel(16),
     },
     cardHeader: {
@@ -141,7 +141,7 @@ const styles = (theme: Theme) => {
     title: {
       fontSize: fontPixel(20),
       marginBottom: pixelSizeVertical(8),
-      color: theme.colors.orange[400],
+      color: theme.colors.blue[200],
     },
     deviceId: {
       fontSize: fontPixel(theme.fontSize.s),
@@ -155,7 +155,7 @@ const styles = (theme: Theme) => {
     },
     reading: {
       fontFamily: theme.fonts.ManropeBold,
-      color: theme.colors.orange[400],
+      color: theme.colors.blue[200],
     },
     switch: {
       marginTop: pixelSizeVertical(8),
