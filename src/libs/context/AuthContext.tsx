@@ -5,17 +5,15 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {USER_SESSION, deleteFromAsyncStore, getFromAsyncStore} from '../utils';
-
-type User = {
-  email: string;
-  lastName: string;
-  firstName: string;
-};
+import {HAS_VIEWED_WELCOME_SCREEN, USER_SESSION, deleteFromAsyncStore, getFromAsyncStore} from '../utils';
+import { UserInfo } from '../types/auth';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackScreens } from '@/navigation/type';
 
 type TCreateContext = {
-  user?: User;
-  updateUser: (data: User) => void;
+  user?: UserInfo;
+  updateUser: (data: UserInfo) => void;
   clearUser: () => void;
   isAuthenticated: boolean;
   isLoadingSession: boolean;
@@ -36,11 +34,12 @@ interface AuthProviderProps {
 export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
   children,
 }) => {
-  const [user, setUser] = useState<undefined | User>(undefined);
+  const [user, setUser] = useState<undefined | UserInfo>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
-
-  const updateUser = useCallback((data: User) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AuthStackScreens>>();
+  const updateUser = useCallback((data: UserInfo) => {
     setUser(data);
     setIsAuthenticated(true);
   }, []);
@@ -51,14 +50,22 @@ export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
     setIsAuthenticated(false);
   }, []);
 
+
   useEffect(() => {
     (async () => {
       try {
         setIsLoadingSession(true);
-        const session = await getFromAsyncStore<User>(USER_SESSION);
+        const session = await getFromAsyncStore<UserInfo>(USER_SESSION);
         if (session) {
           setUser(session);
           setIsAuthenticated(true);
+        }
+        const hasViewedWelcome = await getFromAsyncStore(
+          HAS_VIEWED_WELCOME_SCREEN,
+        );
+        if (!session && !hasViewedWelcome) {
+          navigation.navigate('Welcome');
+          return;
         }
       } catch {
         clearUser();
@@ -66,7 +73,7 @@ export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
         setIsLoadingSession(false);
       }
     })();
-  }, [clearUser]);
+  }, [clearUser, navigation]);
 
   const authContextValues = {
     user,

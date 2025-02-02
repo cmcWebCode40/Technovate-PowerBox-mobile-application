@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const USER_SESSION = 'user_session';
 
+export const HAS_VIEWED_WELCOME_SCREEN = 'has_viewed_welcome_screen';
+
 export const saveToAsyncStore = async <T>(key: string, value: T) => {
   const jsonValue = JSON.stringify(value);
   await AsyncStorage.setItem(key, jsonValue);
