@@ -15,14 +15,14 @@ export const Spinner: React.FunctionComponent<SpinnerProps> = ({
   title,
 }) => {
   const style = useThemedStyles(styles);
-  const {orange} = colors;
+  const {blue} = colors;
 
   if (!loading) {
     return null;
   }
   return (
     <View style={style.container}>
-      <ActivityIndicator size={40} color={orange[400]} />
+      <ActivityIndicator size={40} color={blue[200]} />
       {title && (
         <Typography style={style.loadingText} variant="h2">
           {title}...
