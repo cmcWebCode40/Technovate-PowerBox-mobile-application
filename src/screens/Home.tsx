@@ -3,14 +3,16 @@ import {
   StyleSheet,
   ScrollView,
   ViewStyle,
-  ImageBackground,
   Alert,
+  TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
 import {
   fontPixel,
+  formatDate,
   heightPixel,
   pixelSizeHorizontal,
   pixelSizeVertical,
@@ -19,34 +21,29 @@ import {
   DeviceInfoStatus,
   EnergyDeviceInfoCard,
 } from '@/components/energy-device-cards';
-import {useBluetoothContext} from '@/libs/context';
-import WaveBg from 'assets/images/wave_img.jpg';
-import {Button, Modal, Typography} from '@/components/common';
+import Video from 'react-native-video';
+import {useAuthContext, useBluetoothContext} from '@/libs/context';
+import {AddIcon, Modal, Typography} from '@/components/common';
 import {RechargeEnergyForm} from '@/components/recharge-energy-form';
 import {colors} from '@/libs/constants';
 import axios from 'axios';
-import { showMessage } from 'react-native-flash-message';
-import { DeviceSwitch } from '@/components/energy-device-cards/DeviceSwitch';
-import { EnergyUsageProgressIndicator } from '@/components/energy-usage-progress-indicator';
+import {showMessage} from 'react-native-flash-message';
+import {DeviceSwitch} from '@/components/energy-device-cards/DeviceSwitch';
+import {EnergyUsageProgressIndicator} from '@/components/energy-usage-progress-indicator';
 
 export const HomeScreen: React.FunctionComponent = () => {
   const style = useThemedStyles(styles);
   const [openModal, setOpenModal] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [isRecharge, setIsRecharge] = useState(false);
-  const [unit, setUnit] = useState<string | undefined>('1');
   const [deviceState, setDeviceState] = useState<'ON' | 'OFF'>('OFF');
   const {energyMetric} = useBluetoothContext();
+  const {user} = useAuthContext();
 
   useEffect(() => {
     const stateStatus = parseInt(energyMetric.ac_volt, 10) > 50 ? 'ON' : 'OFF';
     setDeviceState(stateStatus);
-    // console.log('STATE', parseInt(energyMetric.ac_volt, 10));
   }, [energyMetric.ac_volt, energyMetric.state]);
-
-  // console.log('=========energyMetric===========================');
-  // console.log(energyMetric);
-  // console.log('====================================');
 
   const info: {type: DeviceInfoStatus; value: string}[] = [
     {
@@ -71,20 +68,14 @@ export const HomeScreen: React.FunctionComponent = () => {
     setOpenModal(true);
   };
 
-
   const switchDeviceState = async () => {
     const state = deviceState === 'ON' ? '0' : '1';
-    console.log('========state============================');
-    console.log(state);
-    console.log('====================================');
     try {
       setIsSwitching(true);
       const response = await axios.get(
         `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field7=${state}`,
       );
-      console.log('================switchDeviceState====================');
-      console.log(response.data === 0, response.data);
-      console.log('====================================');
+      // TODO: Infinite Recursion Risk fix
       if (response.data <= 0) {
         switchDeviceState();
       } else {
@@ -98,21 +89,17 @@ export const HomeScreen: React.FunctionComponent = () => {
   const rechargeMeter = async (unitValue: string) => {
     try {
       setIsRecharge(true);
-      setUnit(unitValue);
       const response = await axios.get(
-        `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field8=${unit}`,
+        `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field8=${unitValue}`,
       );
-      console.log('================rechargeMeter====================');
-      console.log(response.data === 0, response.data);
-      console.log('====================================');
+      // TODO: Infinite Recursion Risk fix
       if (response.data <= 0) {
-        if (unit) {
-          rechargeMeter(unit);
+        if (unitValue) {
+          rechargeMeter(unitValue);
         }
       } else {
         setIsRecharge(false);
         setOpenModal(false);
-        setUnit(undefined);
         showMessage({
           message: 'PowerBox Recharge of units successfully made',
           type: 'success',
@@ -125,49 +112,72 @@ export const HomeScreen: React.FunctionComponent = () => {
 
   return (
     <View style={style.container}>
-        <ImageBackground resizeMode="contain" source={WaveBg}>
-          <ScrollView
-            style={style.scrollContainer}
-            showsVerticalScrollIndicator={false}>
-            <View style={style.deviceStatus}>
-              <View />
+      <Video
+        source={require('../../assets/galaxy.mp4')}
+        style={style.backgroundVideo}
+        muted={true}
+        repeat={true}
+        resizeMode="cover"
+        rate={1.0}
+        ignoreSilentSwitch="obey"
+      />
+        <ScrollView
+          style={style.scrollContainer}
+          showsVerticalScrollIndicator={false}>
+          <View style={style.deviceStatus}>
+            <View>
+              <Typography style={style.greeting}>
+                Hello, {user?.firstName}.
+              </Typography>
+              <Typography variant="b2">
+               {formatDate(new Date())}
+              </Typography>
+            </View>
+            <View
+              style={[
+                style.status,
+                style.deviceStateStatus,
+                deviceState === 'OFF' && {backgroundColor: colors.red[200]},
+              ]}>
+              <Typography
+                style={[style.statusText, style.deviceStateStatusText]}>
+                {deviceState}
+              </Typography>
+            </View>
+          </View>
+          <View style={style.progressIndicatorContainer}>
+            <EnergyUsageProgressIndicator balance={energyMetric.bal_unit} />
+          </View>
+          <View style={style.infoContainer}>
+            {info.map((item, index) => (
               <View
-                style={[
-                  style.status,
-                  style.deviceStateStatus,
-                  deviceState === 'OFF' && {backgroundColor: colors.red[200]},
-                ]}>
-                <Typography
-                  style={[style.statusText, style.deviceStateStatusText]}>
-                  {deviceState}
-                </Typography>
+                style={[style.infoCard, actionCardStyle(index)]}
+                key={item.type}>
+                <EnergyDeviceInfoCard type={item.type} value={item.value} />
               </View>
+            ))}
+          </View>
+          <DeviceSwitch
+            isLoading={isSwitching}
+            onSwitch={switchDeviceState}
+            color={deviceState === 'ON' ? colors.green[500] : colors.red[200]}
+          />
+          <TouchableOpacity activeOpacity={0.6} onPress={rechargeInverter} style={style.btnContainer}>
+            <View style={style.iconContainer}>
+              <AddIcon color={colors.white[100]} />
             </View>
-            <View style={style.progressIndicatorContainer}>
-              <EnergyUsageProgressIndicator balance={energyMetric.bal_unit} />
-            </View>
-            <View style={style.infoContainer}>
-              {info.map((item, index) => (
-                <View
-                  style={[style.infoCard, actionCardStyle(index)]}
-                  key={item.type}>
-                  <EnergyDeviceInfoCard type={item.type} value={item.value} />
-                </View>
-              ))}
-            </View>
-            <DeviceSwitch isLoading={isSwitching} onSwitch={switchDeviceState} color={deviceState === 'ON' ? colors.green[500] : colors.red[200]} />
-            <View style={style.btnContainer}>
-              <Button variant="contained" onPress={rechargeInverter}>
-                Recharge
-              </Button>
-            </View>
-          </ScrollView>
-        </ImageBackground>
+            <Typography variant="b2" style={style.textIcon}>Recharge</Typography>
+          </TouchableOpacity>
+        </ScrollView>
+      {/* </ImageBackground> */}
       <Modal
         onClose={() => setOpenModal(false)}
         title="PowerBox Recharge"
         visible={openModal}>
-        <RechargeEnergyForm isLoading={isRecharge} rechargeMeter={rechargeMeter} />
+        <RechargeEnergyForm
+          isLoading={isRecharge}
+          rechargeMeter={rechargeMeter}
+        />
       </Modal>
     </View>
   );
@@ -183,10 +193,15 @@ const styles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
+      position: 'relative',
       justifyContent: 'space-between',
       paddingVertical: pixelSizeVertical(16),
       paddingHorizontal: pixelSizeHorizontal(16),
       backgroundColor: theme.colors.black[100],
+    },
+    greeting: {
+      fontWeight: '600',
+      fontFamily: theme.fonts.ManropeBold,
     },
     deviceStatus: {
       flexDirection: 'row',
@@ -253,7 +268,37 @@ const styles = (theme: Theme) => {
     },
     btnContainer: {
       marginBottom: pixelSizeVertical(32),
-      marginTop:pixelSizeVertical(24),
+      marginTop: pixelSizeVertical(24),
+      position: 'absolute',
+      bottom: '-2%',
+      right: '0%',
+    },
+    iconContainer: {
+      height:70,
+      width:70,
+      backgroundColor:theme.colors.green[200],
+      justifyContent:'center',
+      alignItems:'center',
+      borderRadius:theme.radius.full,
+      shadowColor: theme.colors.white[100],
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    textIcon:{
+      fontWeight:'600',
+      marginTop:10,
+      marginLeft:pixelSizeHorizontal(12),
+    },
+    backgroundVideo: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height,
     },
   });
 };

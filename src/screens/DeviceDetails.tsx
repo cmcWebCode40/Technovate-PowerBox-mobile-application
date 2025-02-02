@@ -97,7 +97,7 @@ export const DeviceDetailsScreen: React.FunctionComponent<
           </View>
         </View>
         <View style={style.progressIndicatorContainer}>
-          <EnergyUsageProgressIndicator power={energyUsage} invertColor />
+          <EnergyUsageProgressIndicator balance={energyUsage} invertColor />
         </View>
         <View style={style.infoContainer}>
           {info.map((item, index) => (

@@ -12,7 +12,7 @@ import {fontPixel, pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import PrintedCircuitBoardImage from '../../assets/images/pc_board.png';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackScreens} from '@/navigation/type';
+import {AuthStackScreens} from '@/navigation/type';
 import {useBluetoothContext} from '@/libs/context';
 import {Spinner} from '@/components/common/loader/index.';
 
@@ -31,9 +31,9 @@ export const AddDeviceScreen: React.FunctionComponent = () => {
   const discoveredDevice = Array.from(peripherals.values())[0];
 
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackScreens>>();
+    useNavigation<NativeStackNavigationProp<AuthStackScreens>>();
   const navigateToDashboard = () => {
-    navigation.navigate('Dashboard');
+    navigation.navigate('SignUp');
   };
 
   const handleDevicePairing = () => {

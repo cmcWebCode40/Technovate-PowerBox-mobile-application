@@ -4,3 +4,7 @@ export * from './Devices';
 export * from './Home';
 export * from './DeviceDetails';
 export * from './SignIn';
+export * from './Signup';
+export * from './Transactions';
+export * from './SubscriptionSelection';
+export * from './LinkAccount';
