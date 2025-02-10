@@ -77,6 +77,10 @@ class Auth {
       lastName,
       email,
       phoneNumber,
+      planBalance: null,
+      planType: null,
+      isDeviceLinked:false,
+      boxId:null,
     });
   }
 
