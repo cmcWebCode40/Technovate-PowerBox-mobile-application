@@ -6,6 +6,7 @@ import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {EnergyDeviceCard} from '@/components/energy-device-cards';
 import {useBluetoothContext} from '@/libs/context';
 import {EnergyUsageChart} from '@/components/chart';
+import DevicePlanOverviewCard from '@/components/recharge-energy-form/DevicePlanOverviewCard';
 
 export const DevicesScreen: React.FunctionComponent = () => {
   const style = useThemedStyles(styles);
@@ -13,6 +14,8 @@ export const DevicesScreen: React.FunctionComponent = () => {
   return (
     <View style={style.container}>
       <ScrollView style={style.content}>
+        <DevicePlanOverviewCard />
+        <View style={{marginVertical:12}}>
         <EnergyDeviceCard
           socketNo={'1'}
           power={energyMetric.power}
@@ -20,8 +23,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
           balance={energyMetric.bal_unit}
           voltage={energyMetric.ac_volt}
         />
-        <View>
-          <EnergyUsageChart value={parseInt(energyMetric.power, 10)} />
+          {/* <EnergyUsageChart value={parseInt(energyMetric.power, 10)} /> */}
         </View>
       </ScrollView>
     </View>

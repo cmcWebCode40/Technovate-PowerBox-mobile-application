@@ -30,15 +30,51 @@ import axios from 'axios';
 import {showMessage} from 'react-native-flash-message';
 import {DeviceSwitch} from '@/components/energy-device-cards/DeviceSwitch';
 import {EnergyUsageProgressIndicator} from '@/components/energy-usage-progress-indicator';
+import RechargePreviewCard from '@/components/recharge-energy-form/RechargePreviewCard';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import TransactionStatusCard from '@/components/recharge-energy-form/TransactionStatusCard';
+import {useNavigation} from '@react-navigation/native';
+import transactionService from '@/libs/server/Transaction';
 
-export const HomeScreen: React.FunctionComponent = () => {
+type PaymentInfo = {
+  deviceId?: string;
+  unitAmount?: number;
+  customerName?: string;
+  email?: string;
+  date?: string;
+  convenienceFee?: number;
+};
+
+const defaultPaymentInformation = {
+  deviceId: undefined,
+  unitAmount: undefined,
+  customerName: undefined,
+  email: undefined,
+  date: undefined,
+  convenienceFee: undefined,
+};
+
+type HomeScreenProps = NativeStackScreenProps<any, 'Home'>;
+
+export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
+  route,
+}) => {
   const style = useThemedStyles(styles);
   const [openModal, setOpenModal] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [isRecharge, setIsRecharge] = useState(false);
   const [deviceState, setDeviceState] = useState<'ON' | 'OFF'>('OFF');
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>(
+    defaultPaymentInformation,
+  );
   const {energyMetric} = useBluetoothContext();
   const {user} = useAuthContext();
+  const {params} = route;
+  const navigation = useNavigation<any>();
+  const showTrnxStatus = false;
+  console.log('====================================');
+  console.log(params);
+  console.log('====================================');
 
   useEffect(() => {
     const stateStatus = parseInt(energyMetric.ac_volt, 10) > 50 ? 'ON' : 'OFF';
@@ -110,6 +146,77 @@ export const HomeScreen: React.FunctionComponent = () => {
     }
   };
 
+  const proceed = async (unit: number) => {
+    const payInfo = {
+      deviceId: user?.userId,
+      unitAmount: unit,
+      customerName: user?.firstName,
+      email: user?.email,
+      date: new Date().toISOString().split('T')[0],
+      convenienceFee: 100, // Should be reviewed
+    };
+    setPaymentInfo(payInfo);
+  };
+
+  function closeModal() {
+    setOpenModal(false);
+    setPaymentInfo(defaultPaymentInformation);
+  }
+
+  function viewTransactionDetails() {
+    closeModal();
+    navigation.navigate('Transactions');
+  }
+
+  const pay = async () => {
+    try {
+      setIsRecharge(true);
+      if (
+        paymentInfo.unitAmount &&
+        paymentInfo.customerName &&
+        paymentInfo.email &&
+        paymentInfo.unitAmount &&
+        paymentInfo.convenienceFee
+      ) {
+        console.log('====================================');
+        console.log('PAY=====');
+        console.log('====================================');
+        const {amount, charge, reference, date, status} =
+          await transactionService.initializeTransaction(
+            paymentInfo.unitAmount,
+            paymentInfo.convenienceFee,
+          );
+        console.log('======TRNX==============================');
+        console.log(amount, charge, reference, date, status);
+        console.log('====================================');
+        // closeModal();
+        navigation.navigate('Payment', {
+          merchantCode: 'MX6072',
+          payItemId: '9405967',
+          transactionRef: reference,
+          amount: amount + charge * 1000,
+          currency: '566',
+          mode: 'TEST',
+          customerName: paymentInfo.customerName,
+          customerId: '',
+          customerEmail: paymentInfo.email,
+        });
+      }
+    } catch (error) {
+      console.log('=========error===========================');
+      console.log(error);
+      console.log('====================================');
+      if (error instanceof Error) {
+        showMessage({
+          message: error.message,
+          type: 'danger',
+        });
+      }
+    } finally {
+      setIsRecharge(false);
+    }
+  };
+
   return (
     <View style={style.container}>
       <Video
@@ -121,63 +228,73 @@ export const HomeScreen: React.FunctionComponent = () => {
         rate={1.0}
         ignoreSilentSwitch="obey"
       />
-        <ScrollView
-          style={style.scrollContainer}
-          showsVerticalScrollIndicator={false}>
-          <View style={style.deviceStatus}>
-            <View>
-              <Typography style={style.greeting}>
-                Hello, {user?.firstName}.
-              </Typography>
-              <Typography variant="b2">
-               {formatDate(new Date())}
-              </Typography>
-            </View>
+      <ScrollView
+        style={style.scrollContainer}
+        showsVerticalScrollIndicator={false}>
+        <View style={style.deviceStatus}>
+          <View>
+            <Typography style={style.greeting}>
+              Hello, {user?.firstName}.
+            </Typography>
+            <Typography variant="b2">{formatDate(new Date())}</Typography>
+          </View>
+          <View
+            style={[
+              style.status,
+              style.deviceStateStatus,
+              deviceState === 'OFF' && {backgroundColor: colors.red[200]},
+            ]}>
+            <Typography style={[style.statusText, style.deviceStateStatusText]}>
+              {deviceState}
+            </Typography>
+          </View>
+        </View>
+        <View style={style.progressIndicatorContainer}>
+          <EnergyUsageProgressIndicator balance={energyMetric.bal_unit} />
+        </View>
+        <View style={style.infoContainer}>
+          {info.map((item, index) => (
             <View
-              style={[
-                style.status,
-                style.deviceStateStatus,
-                deviceState === 'OFF' && {backgroundColor: colors.red[200]},
-              ]}>
-              <Typography
-                style={[style.statusText, style.deviceStateStatusText]}>
-                {deviceState}
-              </Typography>
+              style={[style.infoCard, actionCardStyle(index)]}
+              key={item.type}>
+              <EnergyDeviceInfoCard type={item.type} value={item.value} />
             </View>
-          </View>
-          <View style={style.progressIndicatorContainer}>
-            <EnergyUsageProgressIndicator balance={energyMetric.bal_unit} />
-          </View>
-          <View style={style.infoContainer}>
-            {info.map((item, index) => (
-              <View
-                style={[style.infoCard, actionCardStyle(index)]}
-                key={item.type}>
-                <EnergyDeviceInfoCard type={item.type} value={item.value} />
-              </View>
-            ))}
-          </View>
-          <DeviceSwitch
-            isLoading={isSwitching}
-            onSwitch={switchDeviceState}
-            color={deviceState === 'ON' ? colors.green[500] : colors.red[200]}
-          />
-          <TouchableOpacity activeOpacity={0.6} onPress={rechargeInverter} style={style.btnContainer}>
-            <View style={style.iconContainer}>
-              <AddIcon color={colors.white[100]} />
-            </View>
-            <Typography variant="b2" style={style.textIcon}>Recharge</Typography>
-          </TouchableOpacity>
-        </ScrollView>
-      {/* </ImageBackground> */}
-      <Modal
-        onClose={() => setOpenModal(false)}
-        title="PowerBox Recharge"
-        visible={openModal}>
-        <RechargeEnergyForm
-          isLoading={isRecharge}
-          rechargeMeter={rechargeMeter}
+          ))}
+        </View>
+        <DeviceSwitch
+          isLoading={isSwitching}
+          onSwitch={switchDeviceState}
+          color={deviceState === 'ON' ? colors.green[500] : colors.red[200]}
         />
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={rechargeInverter}
+          style={style.btnContainer}>
+          <View style={style.iconContainer}>
+            <AddIcon color={colors.white[100]} />
+          </View>
+          <Typography variant="b2" style={style.textIcon}>
+            Recharge
+          </Typography>
+        </TouchableOpacity>
+      </ScrollView>
+      {/* </ImageBackground> */}
+      <Modal onClose={closeModal} title="PowerBox Recharge" visible={openModal}>
+        {paymentInfo.deviceId ? (
+          <RechargePreviewCard
+            isLoading={isRecharge}
+            pay={pay}
+            {...paymentInfo}
+          />
+        ) : (
+          <RechargeEnergyForm isLoading={isRecharge} rechargeMeter={proceed} />
+        )}
+        {showTrnxStatus && (
+          <TransactionStatusCard
+            status="PENDING"
+            onViewDetails={viewTransactionDetails}
+          />
+        )}
       </Modal>
     </View>
   );
@@ -274,22 +391,22 @@ const styles = (theme: Theme) => {
       right: '0%',
     },
     iconContainer: {
-      height:70,
-      width:70,
-      backgroundColor:theme.colors.green[200],
-      justifyContent:'center',
-      alignItems:'center',
-      borderRadius:theme.radius.full,
+      height: 70,
+      width: 70,
+      backgroundColor: theme.colors.green[200],
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: theme.radius.full,
       shadowColor: theme.colors.white[100],
       shadowOffset: {width: 0, height: 2},
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 4,
     },
-    textIcon:{
-      fontWeight:'600',
-      marginTop:10,
-      marginLeft:pixelSizeHorizontal(12),
+    textIcon: {
+      fontWeight: '600',
+      marginTop: 10,
+      marginLeft: pixelSizeHorizontal(12),
     },
     backgroundVideo: {
       position: 'absolute',

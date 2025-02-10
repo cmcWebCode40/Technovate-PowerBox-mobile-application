@@ -8,3 +8,4 @@ export * from './Signup';
 export * from './Transactions';
 export * from './SubscriptionSelection';
 export * from './LinkAccount';
+export * from './Payment';
