@@ -7,7 +7,7 @@ import {pixelSizeVertical} from '@/libs/utils';
 
 interface RechargeEnergyFormProps {
   isLoading:boolean
-  rechargeMeter: (unit: string) => void;
+  rechargeMeter: (unit: number) => void;
 }
 
 export const RechargeEnergyForm: React.FunctionComponent<
@@ -23,7 +23,7 @@ export const RechargeEnergyForm: React.FunctionComponent<
       Alert.alert('unit required');
       return;
     }
-    rechargeMeter(calcAmount);
+    rechargeMeter(Number(calcAmount));
   };
 
   const handleChange = (text: string) => {
@@ -56,7 +56,7 @@ export const RechargeEnergyForm: React.FunctionComponent<
         <Typography>= {Number(unit).toFixed(1)}</Typography>
       </View>
       <Button variant="contained" disabled={!unit || isLoading} loading={isLoading} onPress={submit}>
-        Send
+        Proceed
       </Button>
     </View>
   );

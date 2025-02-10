@@ -96,7 +96,6 @@ const styles = (theme: Theme) => {
       borderWidth: 1,
       borderRadius: theme.radius.lg,
       shadowColor: theme.colors.black[100],
-      borderColor: theme.colors.white[100],
       backgroundColor: theme.colors.black[200],
       paddingVertical: pixelSizeVertical(16),
       marginBottom: pixelSizeVertical(24),
