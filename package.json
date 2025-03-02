@@ -42,6 +42,7 @@
     "react-native-svg": "^15.6.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-video": "^6.7.0",
+    "react-native-vision-camera": "^4.6.3",
     "react-native-webview": "^13.13.2",
     "text-decoding": "^1.0.0",
     "text-encoding": "^0.7.0",
