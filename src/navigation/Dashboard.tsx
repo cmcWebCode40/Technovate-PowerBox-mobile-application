@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React from 'react';
+import React, { useEffect } from 'react';
 import {Theme, theme as themes} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
 import {AccountScreen, DevicesScreen, HomeScreen, TransactionScreen} from '@/screens';
@@ -8,6 +8,10 @@ import {StyleSheet, TextStyle, View} from 'react-native';
 import {HomeIcon} from '@/components/common/icons/Home';
 import {AccountIcon, AddIcon, TransactionIcon, Typography} from '@/components/common';
 import {heightPixel, pixelSizeVertical} from '@/libs/utils';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MainStackScreens } from './type';
+import { useAuthContext } from '@/libs/context';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,6 +21,16 @@ type TabBarLabelProps = {
 
 export const Dashboard = () => {
   const {tabBarStyle, container} = useThemedStyles(styles);
+  const {user} = useAuthContext();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackScreens>>();
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (!user?.isDeviceLinked) {
+      navigation.navigate('LinkAccount');
+    }
+  }, [navigation, user?.isDeviceLinked, isFocused]);
+
   const tabLabelStyle = (focused: boolean): TextStyle => ({
     fontWeight: '600',
     fontSize: themes.fontSize.s,
@@ -53,7 +67,7 @@ export const Dashboard = () => {
               ),
               tabBarIcon: item.icon,
             }}
-            component={item.component}
+            component={item.component as any}
           />
         ))}
       </Tab.Navigator>

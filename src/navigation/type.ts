@@ -19,10 +19,17 @@ export type MainStackScreens = {
   SubscriptionSelection: undefined;
   LinkAccount: undefined;
   Payment: DeviceRechargePayload;
-  Dashboard:{transRef: string};
+  Dashboard:{transRef?: string};
   DeviceDetails?: {
     socketId: SocketIdentifiers;
   };
+  TransactionDetails:{
+    date: string;
+    transRef: string;
+    amount: string | number;
+    loadStatus:any;
+    status: 'SUCCESSFUL' | 'FAILED' | 'PENDING';
+  }
 };
 
 export type RootStackScreens = {

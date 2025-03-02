@@ -13,6 +13,7 @@ import {
 import {useAuthContext} from '@/libs/context';
 import {AuthStackScreens, MainStackScreens} from './type';
 import {WelcomeScreen} from '@/screens/Welcome';
+import { TransactionDetailScreen } from '@/screens/TransactionDetails';
 
 const RootStack = createNativeStackNavigator<any>();
 const MainStack = createNativeStackNavigator<MainStackScreens>();
@@ -29,6 +30,7 @@ const MainNavigator = () => {
       <MainStack.Screen name="DeviceDetails" component={DeviceDetailsScreen} />
       <MainStack.Screen name="LinkAccount" component={LinkAccountScreen} />
       <MainStack.Screen name="Payment" component={PaymentScreen} />
+      <MainStack.Screen name="TransactionDetails" component={TransactionDetailScreen} />
       <MainStack.Screen name="SubscriptionSelection" component={SubscriptionSelectionScreen} />
     </MainStack.Navigator>
   );
@@ -54,7 +56,7 @@ export const RootNavigator: React.FunctionComponent = () => {
       screenOptions={{
         headerShown: false,
       }}>
-      {!isAuthenticated ? (
+      {isAuthenticated ? (
         <RootStack.Screen name="Main" component={MainNavigator} />
       ) : (
         <RootStack.Screen name="Auth" component={AuthNavigator} />
