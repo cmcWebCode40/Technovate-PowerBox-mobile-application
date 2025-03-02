@@ -27,3 +27,5 @@ export * from './ActiveRadio';
 export * from './Success';
 export * from './Failed';
 export * from './Pending';
+export * from './Battery';
+export * from './ChargingBattery';
