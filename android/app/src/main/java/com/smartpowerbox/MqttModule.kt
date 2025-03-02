@@ -121,6 +121,25 @@ class MqttModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         }
     }
 
+    @ReactMethod
+    fun publish(topic: String, message: String, qos: Int, promise: Promise) {
+        try {
+            if (mqttClient.isConnected) {
+                val mqttMessage = MqttMessage(message.toByteArray()).apply {
+                    this.qos = qos
+                    // Optionally, set the retain flag if needed:
+                    // this.isRetained = true
+                }
+                mqttClient.publish(topic, mqttMessage)
+                promise.resolve("Message published to topic: $topic")
+            } else {
+                promise.reject("MQTT_PUBLISH_ERROR", "Client is not connected")
+            }
+        } catch (e: Exception) {
+            promise.reject("MQTT_PUBLISH_ERROR", e.message)
+        }
+    }
+
     private fun reconnect() {
         if (isConnecting) return
         isConnecting = true
