@@ -20,42 +20,41 @@ export type SocketResponse = {
 
 export type SocketIdentifiers = 'SCK0002' | 'SCK0001';
 
-
 export interface EnergyMetricResponse {
-  channel: Channel
-  feeds: Feed[]
+  channel: Channel;
+  feeds: Feed[];
 }
 
 export interface Channel {
-  created_at: string
-  description: string
-  field1: string
-  field2: string
-  field3: string
-  field4: string
-  field5: string
-  field6: string
-  field7: string
-  field8: string
-  id: number
-  last_entry_id: number
-  latitude: string
-  longitude: string
-  name: string
-  updated_at: string
+  created_at: string;
+  description: string;
+  field1: string;
+  field2: string;
+  field3: string;
+  field4: string;
+  field5: string;
+  field6: string;
+  field7: string;
+  field8: string;
+  id: number;
+  last_entry_id: number;
+  latitude: string;
+  longitude: string;
+  name: string;
+  updated_at: string;
 }
 
 export interface Feed {
-  created_at: string
-  entry_id: number
-  field1: string
-  field2: string
-  field3: string
-  field4: string
-  field5: string
-  field6: string
-  field7: string
-  field8: any
+  created_at: string;
+  entry_id: number;
+  field1: string;
+  field2: string;
+  field3: string;
+  field4: string;
+  field5: string;
+  field6: string;
+  field7: string;
+  field8: any;
 }
 
 export type EnergyMetrics = {
@@ -69,3 +68,16 @@ export type EnergyMetrics = {
   recharge_bal: string;
 };
 
+export type IPGTransactionVerification = {
+  Amount: number;
+  CardNumber: string;
+  MerchantReference: string;
+  Channel: string;
+  SplitAccounts: any[];
+  TransactionDate: string;
+  ResponseCode: '10' | '11' | '00' | '09' | 'Z0';
+  ResponseDescription: string;
+  BankCode: string;
+  PaymentId: number;
+  RemittanceAmount: number;
+};

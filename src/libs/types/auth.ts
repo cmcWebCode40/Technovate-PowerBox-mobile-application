@@ -6,5 +6,8 @@ export interface UserInfo {
     phoneNumber?: string;
     creationTime?:string;
     emailVerified:boolean;
-
+    powerBoxId?:string
+    planBalance?: number, 
+    planType?: string,
+    isDeviceLinked?:boolean,
   }

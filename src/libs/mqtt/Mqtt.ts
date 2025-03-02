@@ -1,6 +1,6 @@
-import { NativeModules } from 'react-native';
+import {NativeModules} from 'react-native';
 
-const { MqttModule } = NativeModules;
+const {MqttModule} = NativeModules;
 
 class MqttService {
   private mqttModule: typeof MqttModule;
@@ -45,13 +45,12 @@ class MqttService {
     }
   }
 
-  async publish(topic: string, message: string, qos: number = 1): Promise<void> {
-    try {
-      const result = await this.mqttModule.publish(topic, message, qos);
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
+  async publish(
+    topic: string,
+    message: string,
+    qos: number = 1,
+  ): Promise<void> {
+     await this.mqttModule.publish(topic, message, qos);
   }
 }
 
