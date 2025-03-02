@@ -1,64 +1,134 @@
 import firestore from '@react-native-firebase/firestore';
 import axios from 'axios';
+import {Config} from '../config/keys';
+import {IPGTransactionVerification} from '../types';
 
-type TransactionStatus = 'SUCCESSFUL' | 'FAILED' | 'PENDING'
+export type TransactionStatus = 'SUCCESSFUL' | 'FAILED' | 'PENDING';
 
-interface TransactionParams {
+const ISW_RESPONSES = {
+  '10': 'SUCCESSFUL',
+  '11': 'SUCCESSFUL',
+  '00': 'SUCCESSFUL',
+  '09': 'PENDING',
+  Z0: 'PENDING',
+};
+
+export interface TransactionParams {
   reference: string;
   amount: number;
   charge: number;
   date: string;
-  status:TransactionStatus;
+  userId: string;
+  loadStatus:TransactionStatus
+  status: TransactionStatus;
 }
 
 class TransactionService {
   private firestore: typeof firestore;
-  private ISW_API_URL = 'https://api.interswitch.com/transaction/verify'; // Replace with actual endpoint
-  private ISW_API_KEY = 'YOUR_ISW_API_KEY';
 
   constructor(firestoreModule: typeof firestore) {
     this.firestore = firestoreModule;
   }
 
-  async initializeTransaction(amount: number, charge: number): Promise<TransactionParams> {
-    const reference = `TRX_${Date.now()}`;
+  async initializeTransaction(
+    amount: number,
+    charge: number,
+    userId: string,
+  ): Promise<TransactionParams> {
+    const reference = `PWR_BX_${Date.now()}`;
     const transaction: TransactionParams = {
       reference,
       amount,
       charge,
+      userId,
       date: new Date().toISOString(),
       status: 'PENDING',
+      loadStatus: 'PENDING',
     };
-    await this.firestore().collection('transactions').doc(reference).set(transaction);
+    await this.firestore()
+      .collection('transactions')
+      .doc(reference)
+      .set(transaction);
     return transaction;
   }
 
-  async verifyTransaction(reference: string): Promise<TransactionParams | null> {
-    try {
-      // const response = await axios.post(
-      //   this.ISW_API_URL,
-      //   { reference },
-      //   { headers: { Authorization: `Bearer ${this.ISW_API_KEY}` } }
-      // );
+  async verifyTransaction(
+    reference: string,
+    amount: string,
+    deviceConnectivity: 'offline' | 'online',
+  ): Promise<{
+    reference: string;
+    amount: string;
+    status: TransactionStatus | string;
+    loadStatus: TransactionStatus;
+  }> {
+    const response = await axios.get<IPGTransactionVerification>(
+      `${Config.ISW_SERVER_API}/collections/api/v1/gettransaction.json?merchantcode=${Config.merchantCode}&transactionreference=${reference}&amount=${amount}`,
+    );
+    const status = ISW_RESPONSES[response.data.ResponseCode] ?? 'FAILED';
+    const loadStatus =
+      deviceConnectivity === 'offline' && status === 'SUCCESSFUL'
+        ? 'PENDING'
+        : deviceConnectivity === 'online' && status === 'SUCCESSFUL'
+        ? 'SUCCESSFUL'
+        : 'PENDING';
 
-      const newStatus = 'FAILED';
-      // const newStatus = response.data.status as TransactionStatus;
-      await this.firestore().collection('transactions').doc(reference).update({ status: newStatus });
-      const updatedTransaction = await this.firestore().collection('transactions').doc(reference).get();
-      return updatedTransaction.data() as TransactionParams;
-    } catch (error) {
-      console.error('Transaction verification failed:', error);
+    await this.firestore()
+      .collection('transactions')
+      .doc(reference)
+      .update({status, loadStatus});
+    return {
+      amount,
+      status,
+      reference,
+      loadStatus,
+    };
+  }
+
+  async updateLoadStatus(
+    reference: string,
+    loadStatus: TransactionStatus,
+  ): Promise<boolean> {
+
+    await this.firestore()
+      .collection('transactions')
+      .doc(reference)
+      .update({loadStatus});
+    return true;
+  }
+
+  async getTransactionByReference(
+    reference: string,
+  ): Promise<TransactionParams | null> {
+    const transactionRef = firestore()
+      .collection('transactions')
+      .doc(reference);
+    const docSnapshot = await transactionRef.get();
+
+    if (!docSnapshot.exists) {
+      console.error(`Transaction with reference ${reference} not found.`);
       return null;
     }
+    return docSnapshot.data() as TransactionParams;
   }
 
-  async getAllTransactions(): Promise<TransactionParams[]> {
-    const snapshot = await this.firestore().collection('transactions').get();
+  async getAllTransactions(userId:string, source?:'server'|'cache'|'default'): Promise<TransactionParams[]> {
+    const snapshot = await this.firestore().collection('transactions')
+    .where('userId', '==', userId)
+    .get({source: source ?? 'default'});
     return snapshot.docs.map(doc => doc.data() as TransactionParams);
   }
-  async getTotalTransactionsAmountByStatus(status:TransactionStatus): Promise<number> {
-    const snapshot = await this.firestore().collection('transactions').where('status', '==', status).get();
-    return snapshot.docs.reduce((total, doc) => total + (doc.data() as TransactionParams).amount, 0);
+  async getTotalTransactionsAmountByStatus(
+    status: TransactionStatus,
+  ): Promise<number> {
+    const snapshot = await this.firestore()
+      .collection('transactions')
+      .where('status', '==', status)
+      .get();
+    return snapshot.docs.reduce(
+      (total, doc) => total + (doc.data() as TransactionParams).amount,
+      0,
+    );
   }
 }
 

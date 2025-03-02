@@ -3,12 +3,13 @@ import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import firestore, {
   FirebaseFirestoreTypes,
 } from '@react-native-firebase/firestore';
+import { UserInfo } from '../types/auth';
 
-interface UserProfile {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
+interface UserProfile extends UserInfo {
+  // firstName: string;
+  // lastName: string;
+  // email: string;
+  // phoneNumber: string;
 }
 
 class Auth {
@@ -77,10 +78,10 @@ class Auth {
       lastName,
       email,
       phoneNumber,
-      planBalance: null,
-      planType: null,
-      isDeviceLinked:false,
-      boxId:null,
+      planBalance: 0,
+      planType: 'PAY-U-GO',
+      isDeviceLinked: false,
+      powerBoxId: null,
     });
   }
 
@@ -102,6 +103,17 @@ class Auth {
     const user = auth().currentUser;
     console.log('User Session retrieved:', user);
     return user;
+  }
+
+  async updateUserDeviceLink(
+    userId: string,
+    powerBoxId: string,
+  ): Promise<void> {
+    await this.firestore().collection('users').doc(userId).update({
+      isDeviceLinked: true,
+      powerBoxId: powerBoxId,
+    });
+    console.log('User profile updated: device linked and powerBoxId set.');
   }
 
   async logout(): Promise<void> {
