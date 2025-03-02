@@ -5,11 +5,17 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {HAS_VIEWED_WELCOME_SCREEN, USER_SESSION, deleteFromAsyncStore, getFromAsyncStore} from '../utils';
-import { UserInfo } from '../types/auth';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackScreens } from '@/navigation/type';
+import {
+  HAS_VIEWED_WELCOME_SCREEN,
+  USER_SESSION,
+  deleteFromAsyncStore,
+  getFromAsyncStore,
+} from '../utils';
+import {UserInfo} from '../types/auth';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {AuthStackScreens} from '@/navigation/type';
+import { checkExpiration } from '../utils/authHelper';
 
 type TCreateContext = {
   user?: UserInfo;
@@ -55,6 +61,11 @@ export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
     (async () => {
       try {
         setIsLoadingSession(true);
+        const hasTokenExpired = await checkExpiration();
+        if (hasTokenExpired) {
+          clearUser();
+          return;
+        }
         const session = await getFromAsyncStore<UserInfo>(USER_SESSION);
         if (session) {
           setUser(session);
