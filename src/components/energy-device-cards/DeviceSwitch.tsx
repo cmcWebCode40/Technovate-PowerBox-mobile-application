@@ -13,10 +13,11 @@ import { PowerSupplyIcon } from '../common';
 interface DeviceSwitchProps {
   isLoading: boolean;
   color: string;
+  disabled:boolean;
   onSwitch: () => void;
 }
 
-export const DeviceSwitch: React.FunctionComponent<DeviceSwitchProps> = ({ color, onSwitch, isLoading }) => {
+export const DeviceSwitch: React.FunctionComponent<DeviceSwitchProps> = ({ color, onSwitch, isLoading, disabled }) => {
   const [scaleValue] = useState(new Animated.Value(1));
 
   const onPressOut = () => {
@@ -55,7 +56,7 @@ export const DeviceSwitch: React.FunctionComponent<DeviceSwitchProps> = ({ color
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback
-        disabled={isLoading}
+        disabled={disabled || isLoading}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         testID="power-supply-button"

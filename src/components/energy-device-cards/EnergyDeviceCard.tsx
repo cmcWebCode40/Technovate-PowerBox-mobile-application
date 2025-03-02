@@ -2,26 +2,26 @@ import {View, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import React from 'react';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
-import {LargePlugIcon, Typography} from '../common';
+import {LargePlugIcon, SwitchIcon, Typography} from '../common';
 import {fontPixel, pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {colors} from '@/libs/constants';
 import LineImage from '../../../assets/images/line.png';
 
 interface EnergyDeviceCardProps {
-  state: 'on' | 'off';
-  voltage: string;
+  upsFlag:boolean;
+  voltage?: number;
   power: string;
-  socketNo: string;
+  socketNo?: string;
   balance:number
+  upsFlagHandler:(state:boolean)=>void
 }
 
 export const EnergyDeviceCard: React.FunctionComponent<
   EnergyDeviceCardProps
-> = ({ state, power, voltage, balance}) => {
-  const {green, red, blue} = colors;
+> = ({ upsFlag, power, voltage, balance, socketNo, upsFlagHandler}) => {
+  const {green} = colors;
   const mainStyle = useThemedStyles(styles);
 
-  const isOnline = state === 'on';
 
   return (
     <TouchableOpacity
@@ -40,20 +40,21 @@ export const EnergyDeviceCard: React.FunctionComponent<
         <View
           style={[
             mainStyle.status,
-            {backgroundColor: isOnline ? green[700] : red[100]},
+            {backgroundColor: green[700]},
           ]}>
           <Typography
             style={[
               mainStyle.statusText,
-              {color: isOnline ? green[600] : blue[200]},
+              {color:green[600]},
             ]}>
-            {'READING'}
+            {socketNo}
           </Typography>
         </View>
       </View>
       <View style={mainStyle.footer}>
-        <View>
-          <Typography style={mainStyle.title}>Optimized</Typography>
+        <View style={mainStyle.ups}>
+          <Typography style={mainStyle.title}>UPS Mode</Typography>
+          <SwitchIcon onChange={upsFlagHandler}  isEnabled={upsFlag} />
         </View>
         <Image source={LineImage} />
         <View>
@@ -139,8 +140,9 @@ const styles = (theme: Theme) => {
     },
     title: {
       fontSize: fontPixel(20),
-      marginBottom: pixelSizeVertical(8),
+      marginVertical: pixelSizeVertical(8),
       color: theme.colors.blue[200],
+      marginRight:pixelSizeHorizontal(10)
     },
     deviceId: {
       fontSize: fontPixel(theme.fontSize.s),
@@ -149,7 +151,7 @@ const styles = (theme: Theme) => {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginTop: pixelSizeVertical(-8),
+      // marginTop: pixelSizeVertical(-8),
       paddingHorizontal: pixelSizeVertical(12),
     },
     reading: {
@@ -158,6 +160,11 @@ const styles = (theme: Theme) => {
     },
     switch: {
       marginTop: pixelSizeVertical(8),
+    },
+    ups:{
+      justifyContent:'space-between',
+      alignItems:'center',
+      flexDirection:'row',
     },
   });
 };

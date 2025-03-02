@@ -1,11 +1,6 @@
 import {StyleSheet, View} from 'react-native';
 import React from 'react';
-import {
-  AcVoltIcon,
-  ElectricPlugIcon,
-  PlugIcon,
-  Typography,
-} from '../common';
+import {AcVoltIcon, ElectricPlugIcon, PlugIcon, Typography} from '../common';
 import {colors} from '@/libs/constants';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
@@ -45,20 +40,22 @@ const statues = {
   },
 };
 interface EnergyDeviceInfoCardProps {
-  type: DeviceInfoStatus;
+  type?: DeviceInfoStatus;
   value: string;
+  title?: string;
+  icon?: React.ReactNode;
 }
 
 export const EnergyDeviceInfoCard: React.FunctionComponent<
   EnergyDeviceInfoCardProps
-> = ({type, value}) => {
+> = ({type = 'AC_CURRENT', value, title, icon}) => {
   const style = useThemedStyles(styles);
 
   return (
     <View style={style.container}>
-      {statues[type].icon}
+      {icon ?? statues[type].icon}
       <Typography variant="b2" style={style.title}>
-        {statues[type].title}
+        {title ?? statues[type].title}
       </Typography>
       <Typography style={style.info}>{value}</Typography>
     </View>
@@ -70,14 +67,14 @@ const styles = (theme: Theme) => {
     container: {
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#1A1A1A',
+      backgroundColor: theme.colors.black[200],
       borderRadius: theme.radius.lg,
       paddingVertical: pixelSizeVertical(24),
       shadowColor: theme.colors.white[100],
       shadowOffset: {width: 0, height: 2},
       shadowOpacity: 0.1,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 2,
     },
     title: {
       fontWeight: '600',
