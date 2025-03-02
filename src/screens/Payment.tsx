@@ -6,7 +6,9 @@ import {
 import {useNavigation} from '@react-navigation/native';
 
 import {MainStackScreens} from '@/navigation/type';
-import { Button } from '@/components/common';
+import IswPaymentWebView from '@/libs/isw-pay/IswPaymentWebView';
+import { Config } from '@/libs/config/keys';
+
 
 export type IswTestMode = 'TEST' | 'LIVE';
 
@@ -32,7 +34,7 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
   } = params;
 
   const navigator = useCallback(
-    (navParams?: {transRef: string}) => {
+    (navParams?: {transRef: string, amount:number}) => {
       navigation.navigate<any>('Dashboard', {
         screen: 'Home',
         params: navParams,
@@ -44,20 +46,15 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
   const handleCallback = () => {
     setAutoStart(false);
     navigator({
+      amount : amount,
       transRef: transactionRef,
     });
   };
 
-  const redirectUrl = 'https://example.com/payment-response';
-  const checkoutUrl =
-    'https://newwebpay.qa.interswitchng.com/collections/w/pay';
 
   return (
     <>
-    <Button onPress={handleCallback} style={{justifyContent:'center', marginVertical:'25%'}}>
-      VERIFY PAYMENT
-    </Button>
-      {/* {params.merchantCode ? (
+      {params.merchantCode ? (
         <IswPaymentWebView
           amount={amount}
           currency={currency}
@@ -68,14 +65,13 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
             name: customerName,
             id: customerId,
           }}
-          redirectUrl={redirectUrl}
           payItem={{id: payItemId}}
           trnxRef={transactionRef}
           merchantCode={merchantCode}
           onCompleted={handleCallback}
-          checkoutUrl={checkoutUrl}
+          checkoutUrl={Config.ISW_WEB_CHECKOUT_URL}
         />
-      ) : null} */}
+      ) : null}
     </>
   );
 };

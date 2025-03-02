@@ -1,59 +1,72 @@
-import {View, StyleSheet} from 'react-native';
-import React from 'react';
+import {View, StyleSheet, Alert, FlatList} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import {EmptyDataList} from '@/components/common/no-data-ui/EmptyList';
 import {Spinner} from '@/components/common/loader/index.';
 import {useThemedStyles} from '@/libs/hooks';
 import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {Theme} from '@/libs/config/theme';
 import {Typography} from '@/components/common';
-import {TransactionList} from '@/components/transactions';
-
-const mockTransactions = [
-  {
-    id: '1',
-    date: '2023-10-01',
-    transRef: 'TX123456',
-    amount: '₦15,000',
-    status: 'SUCCESSFUL',
-  },
-  {
-    id: '2',
-    date: '2023-10-02',
-    transRef: 'TX654321',
-    amount: '₦10,000',
-    status: 'FAILED',
-  },
-  {
-    id: '3',
-    date: '2023-10-03',
-    transRef: 'TX987654',
-    amount: '₦5,000',
-    status: 'PENDING',
-  },
-];
+import transactionService, {TransactionParams} from '@/libs/server/Transaction';
+import {TransactionItem} from '@/components/transactions/TransactionItem';
+import {useAuthContext} from '@/libs/context';
+import {useIsFocused} from '@react-navigation/native';
 
 export const TransactionScreen: React.FunctionComponent = () => {
-  const isLoading = false;
-  const transactions: any[] = mockTransactions;
+  const [transactions, setTransactions] = useState<
+    undefined | TransactionParams[]
+  >(undefined);
+  const [isLoading, setIsLoading] = useState(false);
   const style = useThemedStyles(styles);
+  const {user} = useAuthContext();
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (!user?.userId) {
+      return;
+    }
+    (async () => {
+      try {
+        setIsLoading(true);
+        const response = await transactionService.getAllTransactions(
+          user.userId,
+          'server',
+        );
+        setTransactions(response);
+      } catch (error) {
+        Alert.alert('Error fetching data');
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [user?.userId, isFocused]);
+
   return (
     <View style={style.container}>
       <Typography style={style.header}>Transactions</Typography>
       {isLoading ? (
-        <Spinner loading={false} />
+        <Spinner loading={isLoading} />
       ) : (
-        <>
-          {!mockTransactions || mockTransactions?.length < 1 ? (
-            <EmptyDataList
-              message="No transactions yet. Recharge your power box to view your
-                 transaction history."
-            />
-          ) : (
-            <View>
-              <TransactionList transactions={transactions} />
-            </View>
-          )}
-        </>
+        <View style={style.content}>
+          <FlatList
+            data={transactions}
+            keyExtractor={item => item.reference}
+            renderItem={({item}) => (
+              <TransactionItem
+                date={item.date}
+                transRef={item.reference}
+                amount={item.amount}
+                status={item.status}
+                loadStatus={item.loadStatus}
+              />
+            )}
+            ListEmptyComponent={
+              <EmptyDataList
+                message="No transactions yet. Recharge your power box to view your
+               transaction history."
+              />
+            }
+          />
+        </View>
       )}
     </View>
   );
@@ -69,6 +82,13 @@ const styles = ({colors}: Theme) => {
     },
     header: {
       textAlign: 'center',
+    },
+    content: {
+      paddingVertical: pixelSizeVertical(16),
+    },
+    emptyText: {
+      textAlign: 'center',
+      color: colors.gray[500],
     },
   });
 };

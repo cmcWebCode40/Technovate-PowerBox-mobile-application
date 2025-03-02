@@ -21,6 +21,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import authInstance from '@/libs/server/Auth';
 import {UserInfo} from '@/libs/types/auth';
+import { saveTokenExpiration } from '@/libs/utils/authHelper';
 
 export const SignInSchema = Yup.object().shape({
   email: Yup.string().required('Email is required!').trim(),
@@ -56,6 +57,8 @@ export const SignInScreen: React.FunctionComponent = () => {
         creationTime: session.metadata.creationTime,
       };
       await saveToAsyncStore(USER_SESSION, userInfo);
+      const DEFAULT_SESSION_EXPIRATION = 12 * 60 * 60; // 3 hours in seconds
+      await saveTokenExpiration(DEFAULT_SESSION_EXPIRATION);
       updateUser(userInfo);
     } catch (error) {
       Alert.alert('Login Error:', authInstance.handleError(error));
@@ -123,7 +126,7 @@ export const SignInScreen: React.FunctionComponent = () => {
               }}
               style={style.button}
               variant="contained">
-              Login In
+              Login
             </Button>
           </>
         )}

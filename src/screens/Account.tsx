@@ -25,7 +25,26 @@ export const AccountScreen: React.FunctionComponent = () => {
   const whatsappLink = 'https://wa.me/2347067653813';
 
 
-  const logout = async () => {
+  const requestToLogout = () => {
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Accept',
+          onPress: logout,
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+
+  async function logout () {
     try {
       setIsLoading(true);
       await authInstance.logout();
@@ -36,7 +55,7 @@ export const AccountScreen: React.FunctionComponent = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   const openWhatsApp = async () => {
     try {
@@ -64,7 +83,7 @@ export const AccountScreen: React.FunctionComponent = () => {
         openWhatsApp();
         return;
       case 'logout':
-        logout();
+        requestToLogout();
         return;
     }
   };

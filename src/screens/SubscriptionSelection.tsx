@@ -18,7 +18,6 @@ export const SubscriptionSelectionScreen: React.FunctionComponent = () => {
 
   const handleProceed = () => {
     // Handle the proceed action here
-    console.log('Proceeding with:', selectedOption);
   };
 
   return (

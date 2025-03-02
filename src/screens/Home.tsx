@@ -3,12 +3,11 @@ import {
   StyleSheet,
   ScrollView,
   ViewStyle,
-  Alert,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {useThemedStyles} from '@/libs/hooks';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useThemedStyles, useTransactions} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
 import {
   fontPixel,
@@ -22,36 +21,27 @@ import {
   EnergyDeviceInfoCard,
 } from '@/components/energy-device-cards';
 import Video from 'react-native-video';
-import {useAuthContext, useBluetoothContext} from '@/libs/context';
-import {AddIcon, Modal, Typography} from '@/components/common';
+import {useAuthContext, useMqttContext} from '@/libs/context';
+import {
+  AddIcon,
+  ChargingBatteryIcon,
+  Modal,
+  Typography,
+} from '@/components/common';
 import {RechargeEnergyForm} from '@/components/recharge-energy-form';
 import {colors} from '@/libs/constants';
-import axios from 'axios';
-import {showMessage} from 'react-native-flash-message';
 import {DeviceSwitch} from '@/components/energy-device-cards/DeviceSwitch';
 import {EnergyUsageProgressIndicator} from '@/components/energy-usage-progress-indicator';
 import RechargePreviewCard from '@/components/recharge-energy-form/RechargePreviewCard';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import TransactionStatusCard from '@/components/recharge-energy-form/TransactionStatusCard';
-import {useNavigation} from '@react-navigation/native';
-import transactionService from '@/libs/server/Transaction';
+import transactionService, {TransactionStatus} from '@/libs/server/Transaction';
+import {BackDrop} from '@/components/common/modal/BackDrop';
 
-type PaymentInfo = {
-  deviceId?: string;
-  unitAmount?: number;
-  customerName?: string;
-  email?: string;
-  date?: string;
-  convenienceFee?: number;
-};
-
-const defaultPaymentInformation = {
-  deviceId: undefined,
-  unitAmount: undefined,
-  customerName: undefined,
-  email: undefined,
-  date: undefined,
-  convenienceFee: undefined,
+type TransactionStatusVerification = {
+  isVerifying: boolean;
+  unitLoaded: boolean;
+  status?: TransactionStatus;
 };
 
 type HomeScreenProps = NativeStackScreenProps<any, 'Home'>;
@@ -60,165 +50,106 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
   route,
 }) => {
   const style = useThemedStyles(styles);
-  const [openModal, setOpenModal] = useState(false);
-  const [isSwitching, setIsSwitching] = useState(false);
-  const [isRecharge, setIsRecharge] = useState(false);
-  const [deviceState, setDeviceState] = useState<'ON' | 'OFF'>('OFF');
-  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>(
-    defaultPaymentInformation,
-  );
-  const {energyMetric} = useBluetoothContext();
+  const [transactionStatusDetails, setTransactionStatusDetails] =
+    useState<TransactionStatusVerification>({
+      isVerifying: false,
+      status: undefined,
+      unitLoaded: false,
+    });
   const {user} = useAuthContext();
-  const {params} = route;
-  const navigation = useNavigation<any>();
-  const showTrnxStatus = false;
-  console.log('====================================');
-  console.log(params);
-  console.log('====================================');
+  const {params} = route as unknown as {
+    params: {transRef: string; amount: string};
+  };
+  const {
+    openModal,
+    isRecharge,
+    closeModal,
+    removeParams,
+    paymentInfo,
+    proceedToPay,
+    displayModal,
+    proceedToPreview,
+    viewTransactionDetails,
+  } = useTransactions();
+  const {
+    deviceReading,
+    deviceUnitTopUp,
+    devicePowerControl,
+    loadingState,
+    connectivity,
+  } = useMqttContext();
 
   useEffect(() => {
-    const stateStatus = parseInt(energyMetric.ac_volt, 10) > 50 ? 'ON' : 'OFF';
-    setDeviceState(stateStatus);
-  }, [energyMetric.ac_volt, energyMetric.state]);
+    if (params?.transRef) {
+      verifyTransaction();
+    }
+  }, [params?.transRef]);
+
+  const verifyTransaction = useCallback(async () => {
+    try {
+      if (!params?.transRef) {
+        return;
+      }
+      setTransactionStatusDetails(state => ({...state, isVerifying: true}));
+      const response = await transactionService.verifyTransaction(
+        params?.transRef,
+        params.amount,
+        connectivity.deviceStatus,
+      );
+      if (response.loadStatus === 'SUCCESSFUL') {
+        const amount = Number(params.amount) / 100;
+        await deviceUnitTopUp(String(amount), params?.transRef);
+        setTransactionStatusDetails(state => ({...state}));
+      }
+      if (response?.status) {
+        setTransactionStatusDetails({
+          isVerifying: false,
+          unitLoaded: false,
+          status: response.status as any,
+        });
+      }
+      removeParams({
+        transRef: undefined,
+      });
+      displayModal();
+    } catch {
+return;
+    } finally {
+      setTransactionStatusDetails(state => ({
+        ...state,
+        isVerifying: false,
+        unitLoaded: false,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params?.transRef, removeParams]);
 
   const info: {type: DeviceInfoStatus; value: string}[] = [
     {
       type: 'AC_CURRENT',
-      value: `${energyMetric?.battery_voltage}%`,
+      value: `${deviceReading?.battPercent?.toFixed(2)}%`,
     },
     {
       type: 'POWER_CONSUMPTION',
-      value: `${Number(energyMetric.power).toFixed(1)} W`,
+      value: `${deviceReading?.chargeCurrent?.toFixed(2)} W`,
     },
     {
       type: 'FREQUENCY',
-      value: `${Number(energyMetric.consumption).toFixed(3)} KWh`,
+      value: `${deviceReading?.battVolt?.toFixed(2)} KWh`,
     },
     {
       type: 'AC_VOLTAGE',
-      value: `${Number(energyMetric.ac_volt).toFixed(1)} V`,
+      value: `${deviceReading?.acVolt?.toFixed(2)} V`,
     },
   ];
 
   const rechargeInverter = () => {
-    setOpenModal(true);
-  };
-
-  const switchDeviceState = async () => {
-    const state = deviceState === 'ON' ? '0' : '1';
-    try {
-      setIsSwitching(true);
-      const response = await axios.get(
-        `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field7=${state}`,
-      );
-      // TODO: Infinite Recursion Risk fix
-      if (response.data <= 0) {
-        switchDeviceState();
-      } else {
-        setIsSwitching(false);
-      }
-    } catch (error) {
-      Alert.alert('Error occurred');
-    }
-  };
-
-  const rechargeMeter = async (unitValue: string) => {
-    try {
-      setIsRecharge(true);
-      const response = await axios.get(
-        `https://api.thingspeak.com/update?api_key=PIC7O5616PV9V04P&field8=${unitValue}`,
-      );
-      // TODO: Infinite Recursion Risk fix
-      if (response.data <= 0) {
-        if (unitValue) {
-          rechargeMeter(unitValue);
-        }
-      } else {
-        setIsRecharge(false);
-        setOpenModal(false);
-        showMessage({
-          message: 'PowerBox Recharge of units successfully made',
-          type: 'success',
-        });
-      }
-    } catch (error) {
-      Alert.alert('Error occurred');
-    }
-  };
-
-  const proceed = async (unit: number) => {
-    const payInfo = {
-      deviceId: user?.userId,
-      unitAmount: unit,
-      customerName: user?.firstName,
-      email: user?.email,
-      date: new Date().toISOString().split('T')[0],
-      convenienceFee: 100, // Should be reviewed
-    };
-    setPaymentInfo(payInfo);
-  };
-
-  function closeModal() {
-    setOpenModal(false);
-    setPaymentInfo(defaultPaymentInformation);
-  }
-
-  function viewTransactionDetails() {
-    closeModal();
-    navigation.navigate('Transactions');
-  }
-
-  const pay = async () => {
-    try {
-      setIsRecharge(true);
-      if (
-        paymentInfo.unitAmount &&
-        paymentInfo.customerName &&
-        paymentInfo.email &&
-        paymentInfo.unitAmount &&
-        paymentInfo.convenienceFee
-      ) {
-        console.log('====================================');
-        console.log('PAY=====');
-        console.log('====================================');
-        const {amount, charge, reference, date, status} =
-          await transactionService.initializeTransaction(
-            paymentInfo.unitAmount,
-            paymentInfo.convenienceFee,
-          );
-        console.log('======TRNX==============================');
-        console.log(amount, charge, reference, date, status);
-        console.log('====================================');
-        // closeModal();
-        navigation.navigate('Payment', {
-          merchantCode: 'MX6072',
-          payItemId: '9405967',
-          transactionRef: reference,
-          amount: amount + charge * 1000,
-          currency: '566',
-          mode: 'TEST',
-          customerName: paymentInfo.customerName,
-          customerId: '',
-          customerEmail: paymentInfo.email,
-        });
-      }
-    } catch (error) {
-      console.log('=========error===========================');
-      console.log(error);
-      console.log('====================================');
-      if (error instanceof Error) {
-        showMessage({
-          message: error.message,
-          type: 'danger',
-        });
-      }
-    } finally {
-      setIsRecharge(false);
-    }
+    displayModal();
   };
 
   return (
     <View style={style.container}>
+      <BackDrop isLoading={transactionStatusDetails.isVerifying} />
       <Video
         source={require('../../assets/galaxy.mp4')}
         style={style.backgroundVideo}
@@ -238,19 +169,41 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
             </Typography>
             <Typography variant="b2">{formatDate(new Date())}</Typography>
           </View>
-          <View
-            style={[
-              style.status,
-              style.deviceStateStatus,
-              deviceState === 'OFF' && {backgroundColor: colors.red[200]},
-            ]}>
-            <Typography style={[style.statusText, style.deviceStateStatusText]}>
-              {deviceState}
-            </Typography>
-          </View>
+          {deviceReading?.state === 'charging' ? (
+            <ChargingBatteryIcon size={40} />
+          ) : (
+            <View
+              style={[
+                style.status,
+                deviceReading?.state === 'on' && style.deviceStateStatus,
+                deviceReading?.state === 'off' && {
+                  backgroundColor: colors.red[200],
+                },
+              ]}>
+              <Typography
+                style={[style.statusText, style.deviceStateStatusText]}>
+                {deviceReading?.state === 'on'
+                  ? 'ON'
+                  : deviceReading?.state === 'lock'
+                  ? 'LOCK'
+                  : 'off'}
+              </Typography>
+            </View>
+          )}
         </View>
         <View style={style.progressIndicatorContainer}>
-          <EnergyUsageProgressIndicator balance={energyMetric.bal_unit} />
+          <EnergyUsageProgressIndicator balance={deviceReading.balUnit} />
+          <View
+            style={[
+              style.offline,
+              connectivity.deviceStatus === 'online'
+                ? style.deviceOnline
+                : style.deviceOffline,
+            ]}>
+            <Typography variant="b1" style={style.offlineText}>
+              {connectivity.deviceStatus}
+            </Typography>
+          </View>
         </View>
         <View style={style.infoContainer}>
           {info.map((item, index) => (
@@ -262,9 +215,16 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
           ))}
         </View>
         <DeviceSwitch
-          isLoading={isSwitching}
-          onSwitch={switchDeviceState}
-          color={deviceState === 'ON' ? colors.green[500] : colors.red[200]}
+          onSwitch={devicePowerControl}
+          isLoading={loadingState.isToggling}
+          disabled={connectivity.deviceStatus === 'offline'}
+          color={
+            connectivity.deviceStatus === 'offline'
+              ? colors.gray[200]
+              : !deviceReading.state
+              ? colors.green[500]
+              : colors.red[200]
+          }
         />
         <TouchableOpacity
           activeOpacity={0.6}
@@ -278,22 +238,38 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
           </Typography>
         </TouchableOpacity>
       </ScrollView>
-      {/* </ImageBackground> */}
-      <Modal onClose={closeModal} title="PowerBox Recharge" visible={openModal}>
-        {paymentInfo.deviceId ? (
-          <RechargePreviewCard
-            isLoading={isRecharge}
-            pay={pay}
-            {...paymentInfo}
+      <Modal
+        onClose={() => {
+          setTransactionStatusDetails({
+            isVerifying: false,
+            unitLoaded: false,
+            status: undefined,
+          });
+          closeModal();
+        }}
+        title="PowerBox Recharge"
+        visible={openModal}>
+        {transactionStatusDetails.status ? (
+          <TransactionStatusCard
+            status={transactionStatusDetails.status}
+            onViewDetails={viewTransactionDetails}
+            unitLoaded={transactionStatusDetails.unitLoaded}
           />
         ) : (
-          <RechargeEnergyForm isLoading={isRecharge} rechargeMeter={proceed} />
-        )}
-        {showTrnxStatus && (
-          <TransactionStatusCard
-            status="PENDING"
-            onViewDetails={viewTransactionDetails}
-          />
+          <>
+            {paymentInfo.deviceId ? (
+              <RechargePreviewCard
+                isLoading={isRecharge}
+                pay={proceedToPay}
+                {...paymentInfo}
+              />
+            ) : (
+              <RechargeEnergyForm
+                isLoading={isRecharge}
+                rechargeMeter={proceedToPreview}
+              />
+            )}
+          </>
         )}
       </Modal>
     </View>
@@ -416,6 +392,25 @@ const styles = (theme: Theme) => {
       right: 0,
       width: Dimensions.get('window').width,
       height: Dimensions.get('window').height,
+    },
+    offline: {
+      paddingVertical: 6,
+      borderRadius: theme.radius.xxl,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: pixelSizeVertical(16),
+    },
+    offlineText: {
+      textAlign: 'center',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      fontFamily: theme.fonts.ManropeBold,
+    },
+    deviceOnline: {
+      backgroundColor: theme.colors.green[200],
+    },
+    deviceOffline: {
+      backgroundColor: theme.colors.red[200],
     },
   });
 };
