@@ -4,6 +4,7 @@ import { Button, Typography } from '../common';
 import { Theme } from '@/libs/config/theme';
 import { useThemedStyles } from '@/libs/hooks';
 import { pixelSizeVertical } from '@/libs/utils';
+import { NAIRA_SYMBOL } from '@/libs/constants';
 
 interface RechargePreviewCardProps {
   deviceId?: string;
@@ -25,7 +26,6 @@ const RechargePreviewCard: React.FC<RechargePreviewCardProps> = ({
   date,
   pay,
   isLoading,
-  convenienceFee,
 }) => {
   const style = useThemedStyles(styles);
 
@@ -39,11 +39,10 @@ const RechargePreviewCard: React.FC<RechargePreviewCardProps> = ({
   return (
     <View style={style.cardContainer}>
       {renderRow('Device ID:', deviceId)}
-      {renderRow('Unit Amount:', unitAmount)}
+      {renderRow('Unit Amount:', `${NAIRA_SYMBOL}${unitAmount?.toLocaleString()}`)}
       {renderRow('Customer Name:', customerName)}
       {renderRow('Email:', email)}
       {renderRow('Date:', date)}
-      {renderRow('Convenince Fee:', convenienceFee)}
       <Button loading={isLoading} onPress={pay} style={style.btn}>
         Pay
       </Button>

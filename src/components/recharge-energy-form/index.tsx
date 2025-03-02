@@ -53,7 +53,7 @@ export const RechargeEnergyForm: React.FunctionComponent<
       />
       <View style={style.conversionLayout}>
       <Typography> ₦{amount} </Typography>
-        <Typography>= {Number(unit).toFixed(1)}</Typography>
+        <Typography>= {Number(unit)?.toFixed(1)}</Typography>
       </View>
       <Button variant="contained" disabled={!unit || isLoading} loading={isLoading} onPress={submit}>
         Proceed

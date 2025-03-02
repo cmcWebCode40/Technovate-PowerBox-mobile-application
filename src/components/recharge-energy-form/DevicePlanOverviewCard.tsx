@@ -1,25 +1,34 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Typography } from '../common';
-import { Theme } from '@/libs/config/theme';
-import { useThemedStyles } from '@/libs/hooks';
-import { pixelSizeVertical } from '@/libs/utils';
+import {View, StyleSheet} from 'react-native';
+import {Typography} from '../common';
+import {Theme} from '@/libs/config/theme';
+import {useThemedStyles} from '@/libs/hooks';
+import {pixelSizeVertical} from '@/libs/utils';
+import {useAuthContext} from '@/libs/context';
+import {NAIRA_SYMBOL} from '@/libs/constants';
 
-const DevicePlanOverviewCard: React.FC = () => {
+interface DevicePlanOverviewCard {
+  paidAmount?: string;
+}
+
+const DevicePlanOverviewCard: React.FC<DevicePlanOverviewCard> = ({
+  paidAmount,
+}) => {
   const styles = useThemedStyles(createStyles);
   const currentDate = new Date().toLocaleDateString();
+  const {user} = useAuthContext();
 
   return (
     <View style={styles.cardContainer}>
       <Typography variant="h1" style={styles.title}>
-        Wallet Overview
+        Plan Overview
       </Typography>
       <View style={styles.infoRow}>
         <Typography variant="b1" style={styles.label}>
           Total Plan Package:
         </Typography>
         <Typography variant="b1" style={styles.value}>
-          N750,000
+          {NAIRA_SYMBOL} 0
         </Typography>
       </View>
       <View style={styles.infoRow}>
@@ -27,17 +36,21 @@ const DevicePlanOverviewCard: React.FC = () => {
           Balance:
         </Typography>
         <Typography variant="b1" style={styles.value}>
-          N400,000
+          {NAIRA_SYMBOL}
+          {user?.planBalance}
         </Typography>
       </View>
-      <View style={styles.infoRow}>
-        <Typography variant="b1" style={styles.label}>
-          Paid:
-        </Typography>
-        <Typography variant="b1" style={styles.value}>
-          N350,000
-        </Typography>
-      </View>
+      {paidAmount && (
+        <View style={styles.infoRow}>
+          <Typography variant="b1" style={styles.label}>
+            Paid:
+          </Typography>
+          <Typography variant="b1" style={styles.value}>
+            {NAIRA_SYMBOL} {paidAmount}
+          </Typography>
+        </View>
+      )}
+
       <View style={styles.infoRow}>
         <Typography variant="b1" style={styles.label}>
           Date:
@@ -60,10 +73,10 @@ const createStyles = (theme: Theme) =>
       padding: 16,
       marginVertical: pixelSizeVertical(8),
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
+      shadowOffset: {width: 0, height: 2},
       shadowOpacity: 0.2,
       shadowRadius: 4,
-      elevation: 3, // Android shadow
+      elevation: 3,
     },
     title: {
       fontWeight: '700',
