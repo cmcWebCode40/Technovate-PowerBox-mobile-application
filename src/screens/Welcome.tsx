@@ -127,3 +127,4 @@ const styles = ({colors, fontSize, fonts}: Theme) => {
       },
   });
 };
+

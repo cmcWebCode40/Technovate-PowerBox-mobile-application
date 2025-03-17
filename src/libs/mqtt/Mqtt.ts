@@ -2,11 +2,17 @@ import {NativeModules} from 'react-native';
 
 const {MqttModule} = NativeModules;
 
-class MqttService {
-  private mqttModule: typeof MqttModule;
+// import NativeMqttModuleSpec from '@/specs/NativeMqttModuleSpec';
 
-  constructor(mqttModule: typeof MqttModule) {
-    this.mqttModule = mqttModule;
+console.log('=============MqttModule======================');
+console.log(NativeModules);
+console.log('====================================');
+
+class MqttService {
+  private mqttModule:any
+
+  constructor(mqttModule: any) {
+    this.mqttModule = {};
   }
 
   async connect(username: string, password: string): Promise<void> {
@@ -29,8 +35,8 @@ class MqttService {
 
   async subscribe(topic: string, qos: number = 1): Promise<void> {
     try {
-      const result = await this.mqttModule.subscribe(topic, qos);
-      console.log(result);
+      // const result = await this.mqttModule.subscribe(topic, qos);
+      // console.log(result);
     } catch (error) {
       console.error(error);
     }
@@ -38,8 +44,8 @@ class MqttService {
 
   async unSubscribe(topic: string): Promise<void> {
     try {
-      const result = await this.mqttModule.unsubscribe(topic);
-      console.log(result);
+      // const result = await this.mqttModule.unsubscribe(topic);
+      // console.log(result);
     } catch (error) {
       console.error(error);
     }
@@ -55,5 +61,5 @@ class MqttService {
 }
 
 // Instantiate with dependency injection
-const mqttService = new MqttService(MqttModule);
+const mqttService = new MqttService({});
 export default mqttService;

@@ -1,8 +1,8 @@
 import {Text, TextProps, StyleSheet} from 'react-native';
 import React from 'react';
-import {useThemedStyles} from '@/libs/hooks';
-import {Theme} from '@/libs/config/theme';
-import {fontPixel} from '@/libs/utils';
+import { fontPixel } from '@/libs/utils';
+import { useThemedStyles } from '@/libs/hooks';
+import { Theme } from '@/libs/config/theme';
 
 type Heading = 'h1' | 'h2';
 type Body = 'b1' | 'b2';

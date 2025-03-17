@@ -15,7 +15,7 @@ export const AccountScreen: React.FunctionComponent = () => {
   const {clearUser, user} = useAuthContext();
   const firstName = user?.firstName;
   const lastName = user?.lastName;
-  const address = 'EWO';
+  const address = '---';
   const email = user?.email;
   const phoneNumber = user?.phoneNumber;
   const avatarName = `${firstName?.charAt(0) ?? ''} ${

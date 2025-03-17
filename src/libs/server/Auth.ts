@@ -1,15 +1,24 @@
-import {ReactNativeFirebase} from '@react-native-firebase/app';
+import {
+  getApps,
+  initializeApp,
+  ReactNativeFirebase,
+} from '@react-native-firebase/app';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import firestore, {
   FirebaseFirestoreTypes,
 } from '@react-native-firebase/firestore';
-import { UserInfo } from '../types/auth';
+import {UserInfo} from '../types/auth';
+import {Config} from '../config/keys';
+
+if (!getApps().length) {
+  initializeApp({...Config.firebase});
+}
 
 interface UserProfile extends UserInfo {
-  // firstName: string;
-  // lastName: string;
-  // email: string;
-  // phoneNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
 }
 
 class Auth {
@@ -137,3 +146,4 @@ class Auth {
 
 const authInstance = new Auth(auth, firestore);
 export default authInstance;
+

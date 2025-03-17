@@ -7,16 +7,15 @@ import {
   EnergyDeviceCard,
   EnergyDeviceInfoCard,
 } from '@/components/energy-device-cards';
-import {useAuthContext, useBluetoothContext, useMqttContext} from '@/libs/context';
+import {useAuthContext, useMqttContext} from '@/libs/context';
 import DevicePlanOverviewCard from '@/components/recharge-energy-form/DevicePlanOverviewCard';
 import {BatteryIcon} from '@/components/common';
 import transactionService from '@/libs/server/Transaction';
 import { showMessage } from 'react-native-flash-message';
 
 export const DevicesScreen: React.FunctionComponent = () => {
-  const [paidAmount, setPaidAmount] = useState<string|undefined>(undefined);
+  const [paidAmount] = useState<string|undefined>(undefined);
   const style = useThemedStyles(styles);
-  const {energyMetric} = useBluetoothContext();
   const {deviceReading, switchUpsMode, connectivity} = useMqttContext();
   const {user} = useAuthContext();
 
@@ -44,9 +43,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
   useEffect(() => {
     (async ()=>{
        try {
-        const amount = await transactionService.getTotalTransactionsAmountByStatus('SUCCESSFUL');
-          // const formatted = amount?.toFixed(2);
-          // setPaidAmount(formatted);
+        await transactionService.getTotalTransactionsAmountByStatus('SUCCESSFUL');
        } catch (error) {
         if (error instanceof Error) {
           Alert.alert(error.message);
@@ -62,7 +59,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
         <View style={style.details}>
           <EnergyDeviceCard
             socketNo={user?.powerBoxId}
-            power={energyMetric.power}
+            power={''}
             upsFlag={deviceReading.upsFlag}
             balance={deviceReading.balUnit}
             voltage={deviceReading.battVolt}

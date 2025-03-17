@@ -61,6 +61,9 @@ export const SignInScreen: React.FunctionComponent = () => {
       await saveTokenExpiration(DEFAULT_SESSION_EXPIRATION);
       updateUser(userInfo);
     } catch (error) {
+      console.log('=========ERROR===========================');
+      console.log(error);
+      console.log('====================================');
       Alert.alert('Login Error:', authInstance.handleError(error));
     } finally {
       setIsLoading(false);

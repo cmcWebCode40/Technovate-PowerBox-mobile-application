@@ -6,8 +6,8 @@ import {DeviceRealTimeInfo, DeviceStatus, PublishResponse} from '../mqtt/types';
 import {showMessage} from 'react-native-flash-message';
 import transactionService from '../server/Transaction';
 
-const {MqttModule} = NativeModules;
-const mqttEmitter = new NativeEventEmitter(MqttModule);
+// const {MqttModule} = NativeModules;
+// const mqttEmitter = new NativeEventEmitter(MqttModule);
 
 type LoadingState = {
   isRecharging: boolean;
@@ -101,79 +101,79 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
       });
     }
 
-    mqttEmitter.addListener('onConnect', data => {
-      console.log('Connected:', data);
-    });
+    // mqttEmitter.addListener('onConnect', data => {
+    //   console.log('Connected:', data);
+    // });
 
-    mqttEmitter.addListener('onDisconnect', data => {
-      console.log('Disconnected:', data);
-    });
+    // mqttEmitter.addListener('onDisconnect', data => {
+    //   console.log('Disconnected:', data);
+    // });
 
-    mqttEmitter.addListener('onMessage', async data => {
-      if (data.topic === READING_TOPIC) {
-        const parsedMessage = JSON.parse(
-          data.message?.toString(),
-        ) as DeviceRealTimeInfo;
-        setDeviceReading(parsedMessage);
-        console.log(
-          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        );
-      }
-      if (data.topic === STATUS_TOPIC) {
-        const parsedConnectivity = JSON.parse(
-          data.message?.toString(),
-        ) as DeviceStatus;
-        setConnectivity(parsedConnectivity);
-        console.log(
-          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        );
-      }
-      if (data.topic === RESPONSE_TOPIC) {
-        const parsedResponse = JSON.parse(
-          data.message?.toString(),
-        ) as PublishResponse;
+    // mqttEmitter.addListener('onMessage', async data => {
+    //   if (data.topic === READING_TOPIC) {
+    //     const parsedMessage = JSON.parse(
+    //       data.message?.toString(),
+    //     ) as DeviceRealTimeInfo;
+    //     setDeviceReading(parsedMessage);
+    //     console.log(
+    //       `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+    //     );
+    //   }
+    //   if (data.topic === STATUS_TOPIC) {
+    //     const parsedConnectivity = JSON.parse(
+    //       data.message?.toString(),
+    //     ) as DeviceStatus;
+    //     setConnectivity(parsedConnectivity);
+    //     console.log(
+    //       `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+    //     );
+    //   }
+    //   if (data.topic === RESPONSE_TOPIC) {
+    //     const parsedResponse = JSON.parse(
+    //       data.message?.toString(),
+    //     ) as PublishResponse;
 
-        if (
-          parsedResponse.type === 'wallet recharge' &&
-          parsedResponse.msg === 'successful'
-        ) {
-          if (pendingTopUpReference) {
-            await transactionService
-              .updateLoadStatus(pendingTopUpReference, 'SUCCESSFUL')
-              .then(() => {
-                setPendingTopUpReference(undefined);
-                showMessage({
-                  position: 'bottom',
-                  message: parsedResponse.msg,
-                  type:
-                    parsedResponse.msg === 'successful' ? 'success' : 'danger',
-                });
-              });
-          }
-        } else {
-          showMessage({
-            position: 'bottom',
-            message: parsedResponse.msg,
-            type: parsedResponse.msg === 'successful' ? 'success' : 'danger',
-          });
-        }
-        console.log('============parsedResponse========================');
-        console.log(parsedResponse);
-        console.log('====================================');
-        console.log(
-          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        );
-      }
-    });
+    //     if (
+    //       parsedResponse.type === 'wallet recharge' &&
+    //       parsedResponse.msg === 'successful'
+    //     ) {
+    //       if (pendingTopUpReference) {
+    //         await transactionService
+    //           .updateLoadStatus(pendingTopUpReference, 'SUCCESSFUL')
+    //           .then(() => {
+    //             setPendingTopUpReference(undefined);
+    //             showMessage({
+    //               position: 'bottom',
+    //               message: parsedResponse.msg,
+    //               type:
+    //                 parsedResponse.msg === 'successful' ? 'success' : 'danger',
+    //             });
+    //           });
+    //       }
+    //     } else {
+    //       showMessage({
+    //         position: 'bottom',
+    //         message: parsedResponse.msg,
+    //         type: parsedResponse.msg === 'successful' ? 'success' : 'danger',
+    //       });
+    //     }
+    //     console.log('============parsedResponse========================');
+    //     console.log(parsedResponse);
+    //     console.log('====================================');
+    //     console.log(
+    //       `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+    //     );
+    //   }
+    // });
 
     return () => {
       clearTimeout(timeOutHandler);
-      mqttService.unSubscribe(READING_TOPIC);
-      mqttService.unSubscribe(RESPONSE_TOPIC);
-      mqttService.unSubscribe(STATUS_TOPIC);
-      mqttEmitter.removeAllListeners('onDisconnect');
-      mqttEmitter.removeAllListeners('onMessage');
-      mqttEmitter.removeAllListeners('onConnect');
+      // mqttService.unSubscribe(READING_TOPIC);
+      // mqttService.unSubscribe(RESPONSE_TOPIC);
+      // mqttService.unSubscribe(STATUS_TOPIC);
+      // mqttEmitter.removeAllListeners('onDisconnect');
+      // mqttEmitter.removeAllListeners('onMessage');
+      // mqttEmitter.removeAllListeners('onConnect');
     };
   }, [
     READING_TOPIC,

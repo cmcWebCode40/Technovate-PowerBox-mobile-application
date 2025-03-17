@@ -5,6 +5,7 @@ import {
   ViewStyle,
   TouchableOpacity,
   Dimensions,
+  Platform,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useThemedStyles, useTransactions} from '@/libs/hooks';
@@ -113,7 +114,7 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
       });
       displayModal();
     } catch {
-return;
+      return;
     } finally {
       setTransactionStatusDetails(state => ({
         ...state,
@@ -300,7 +301,14 @@ const styles = (theme: Theme) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginTop: pixelSizeVertical(24),
+      ...Platform.select({
+        android: {
+          marginTop: pixelSizeVertical(24),
+        },
+        ios: {
+          marginTop: pixelSizeVertical(64),
+        },
+      }),
     },
     status: {
       borderRadius: theme.radius.xxl,
