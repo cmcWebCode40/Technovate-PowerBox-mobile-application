@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "859459820523",
-    "project_id": "technovate-15506",
-    "storage_bucket": "technovate-15506.firebasestorage.app"
+    "project_number": "339660582869",
+    "project_id": "technovatepowerbox",
+    "storage_bucket": "technovatepowerbox.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:859459820523:android:6a84423276d2fec75497ae",
+        "mobilesdk_app_id": "1:339660582869:android:ed9b0bd331f50174cb575c",
         "android_client_info": {
-          "package_name": "com.smartpowerbox"
+          "package_name": "com.technovatepowerbox"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDUaYNuUX6E4iF4ZuYu6V_6DfpyuvY7VQo"
+          "current_key": "AIzaSyCh9QBs3lVUEbnlGqD9TglDzcvqd1O2TyE"
         }
       ],
       "services": {
