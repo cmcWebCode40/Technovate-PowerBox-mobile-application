@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {Button} from '../button';
-import {AccountIcon, CloseIcon} from '../icons';
+import {AccountIcon, ArrowBackIcon} from '../icons';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
 import {useNavigation} from '@react-navigation/native';
@@ -44,7 +44,7 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
     <View style={style.container}>
       {showHomeIcon ? (
         <TouchableOpacity activeOpacity={0.7} onPress={navigateToDashboard}>
-          <CloseIcon color={'white'} />
+          <ArrowBackIcon color={'white'} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity

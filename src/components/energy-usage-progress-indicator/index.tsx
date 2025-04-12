@@ -7,7 +7,7 @@ import {fontPixel, pixelSizeHorizontal} from '@/libs/utils';
 
 interface EnergyUsageProgressIndicatorProps {
   invertColor?: boolean;
-  balance: number
+  balance: number;
 }
 
 export const EnergyUsageProgressIndicator: React.FunctionComponent<
@@ -20,17 +20,15 @@ export const EnergyUsageProgressIndicator: React.FunctionComponent<
   const wirelessColor = invertColor ? orange[400] : green[300];
 
   return (
-
-        <View style={style.content}>
-          <WireLessIcon color={wirelessColor} />
-          <Typography style={style.progressTitle} variant="h1">
-            {balance} unit
-          </Typography>
-          <Typography variant="b1" style={style.tag}>
-            Energy Balance
-          </Typography>
-        </View>
-
+    <View style={style.content}>
+      <WireLessIcon color={wirelessColor}  size={40}/>
+      <Typography style={style.progressTitle} variant="h1">
+        {balance} unit
+      </Typography>
+      <Typography variant="b1" style={style.tag}>
+        Energy Balance
+      </Typography>
+    </View>
   );
 };
 
@@ -51,12 +49,12 @@ const styles = (theme: Theme) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      height: 200,
-      width: 200,
+      height: 250,
+      width: 250,
       borderRadius: theme.radius.full,
       backgroundColor: 'transparent',
-      borderWidth:4,
-      borderColor:theme.colors.orange[300],
+      // borderWidth: 4,
+      borderColor: theme.colors.black[300],
       paddingHorizontal: pixelSizeHorizontal(20),
       shadowOffset: {
         width: 0,
@@ -73,13 +71,15 @@ const styles = (theme: Theme) => {
     },
     tag: {
       textAlign: 'center',
-      fontWeight:'600',
+      fontWeight: '600',
+      fontFamily:theme.fonts.ManropeSemibold,
       fontSize: fontPixel(theme.fontSize.l),
       color: theme.colors.white[100],
     },
     progressTitle: {
       textAlign: 'center',
       color: theme.colors.white[100],
+      fontSize: fontPixel(theme.fontSize.xxxl),
     },
   });
 };

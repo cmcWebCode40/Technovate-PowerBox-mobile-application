@@ -2,7 +2,7 @@ import React from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
-import {Typography} from '@/components/common';
+import {Button, Typography} from '@/components/common';
 import {NAIRA_SYMBOL} from '@/libs/constants';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
@@ -13,6 +13,8 @@ type TransactionItemProps = {
   transRef: string;
   amount: string | number;
   loadStatus?: any;
+  isOfflineMode?: boolean;
+  loadUnit?: () => void;
   status: 'SUCCESSFUL' | 'FAILED' | 'PENDING';
 };
 
@@ -21,7 +23,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   transRef,
   amount,
   status,
+  loadUnit,
   loadStatus,
+  isOfflineMode,
 }) => {
   const style = useThemedStyles(styles);
 
@@ -44,6 +48,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
       : style.pendingText;
 
   const viewDetails = () => {
+    if (isOfflineMode) {
+      return;
+    }
     navigation.navigate('TransactionDetails', {
       date,
       transRef,
@@ -80,6 +87,11 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
           {loadStatus}
         </Typography>
       </View>
+      {isOfflineMode && (
+        <Button style={style.btn} onPress={loadUnit} size="sm">
+          Load Unit via Bluetooth
+        </Button>
+      )}
     </TouchableOpacity>
   );
 };
@@ -117,6 +129,9 @@ const styles = ({colors, spacing, radius, fonts}: Theme) => {
     },
     pendingText: {
       color: colors.yellow[100],
+    },
+    btn: {
+      marginTop: 20,
     },
   });
 };

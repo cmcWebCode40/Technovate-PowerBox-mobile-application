@@ -11,7 +11,7 @@ import React, {useState} from 'react';
 import {ClosedEyeIcon, OpenEyeIcon} from '../icons';
 import {Typography} from '../typography';
 import {Theme} from '@/libs/config/theme';
-import {fontPixel, pixelSizeVertical} from '@/libs/utils';
+import {createHitSlop, fontPixel, pixelSizeVertical} from '@/libs/utils';
 import {TextField} from './TextField';
 import {useThemedStyles} from '@/libs/hooks';
 import { colors } from '@/libs/constants';
@@ -50,6 +50,7 @@ export const FormGroup: React.FunctionComponent<FormGroupProps> = ({
           style={[style.input, inputStyle]}
           secureTextEntry={usePassword ? !showPassword : undefined}
           {...otherTextInputProps}
+          hitSlop={createHitSlop(20)}
           placeholderTextColor={colors.white[100]}
         />
         {usePassword && (

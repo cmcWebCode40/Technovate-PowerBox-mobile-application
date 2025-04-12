@@ -36,7 +36,7 @@ const TransactionStatusCard: React.FC<TransactionStatusCardProps> = ({
         </Typography>
       </View>
 
-      {unitLoaded && <Typography>'unit successfully loaded' </Typography>}
+      {unitLoaded && <Typography>unit successfully loaded</Typography>}
 
       <Button
         onPress={onViewDetails}
