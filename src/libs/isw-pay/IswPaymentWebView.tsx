@@ -116,6 +116,6 @@ export default forwardRef(IswPaymentWebView);
 const style = StyleSheet.create({
   flex: {
     flex: 1,
-    marginTop: 24,
+    // marginTop: 24,
   },
 });

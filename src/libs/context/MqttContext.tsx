@@ -15,7 +15,7 @@ type LoadingState = {
   isUpsLoading: boolean;
 };
 
-const defaultDeviceInfo = {
+export const defaultDeviceInfo = {
   battVolt: 0,
   cell1: 0,
   cell2: 0,
@@ -30,6 +30,14 @@ const defaultDeviceInfo = {
   battPercent: 0,
   state: 'off',
   upsFlag: false,
+  battHealth: 0,
+  battRCC: 0,
+  chargeCycles: 0,
+  usage: 0,
+  battFCC:0,
+  mode: '-----',
+  deviceId: '-----',
+  deviceState: '----',
 } as DeviceRealTimeInfo;
 
 const defaultLoadingState = {
@@ -115,18 +123,18 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
           data.message?.toString(),
         ) as DeviceRealTimeInfo;
         setDeviceReading(parsedMessage);
-        console.log(
-          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        );
+        // console.log(
+        //   `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+        // );
       }
       if (data.topic === STATUS_TOPIC) {
         const parsedConnectivity = JSON.parse(
           data.message?.toString(),
         ) as DeviceStatus;
         setConnectivity(parsedConnectivity);
-        console.log(
-          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        );
+        // console.log(
+        //   `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+        // );
       }
       if (data.topic === RESPONSE_TOPIC) {
         const parsedResponse = JSON.parse(
@@ -157,9 +165,6 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
             type: parsedResponse.msg === 'successful' ? 'success' : 'danger',
           });
         }
-        console.log('============parsedResponse========================');
-        console.log(parsedResponse);
-        console.log('====================================');
         console.log(
           `Message received: ${data.message} on topic ${data.topic} MQTTX`,
         );

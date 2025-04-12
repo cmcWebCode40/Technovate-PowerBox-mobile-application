@@ -1,3 +1,5 @@
+import { TextDecoder } from 'text-encoding';
+
 export const stringToCharCodeArray = (text: string) => {
   const data = [];
   for (let i = 0; i < 16; i++) {

@@ -17,6 +17,7 @@ const widthPixel = (size: number) => normalize(size, 'width');
 const heightPixel = (size: number) => normalize(size, 'height');
 const fontPixel = heightPixel;
 
+
 const pixelSizeVertical = heightPixel;
 const pixelSizeHorizontal = widthPixel;
 
@@ -27,3 +28,11 @@ export {
   pixelSizeVertical,
   pixelSizeHorizontal,
 };
+
+
+export const createHitSlop = (value: number) => ({
+  top: value,
+  bottom: value,
+  left: value,
+  right: value,
+});

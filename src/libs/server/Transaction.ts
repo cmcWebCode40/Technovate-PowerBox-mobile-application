@@ -115,7 +115,8 @@ class TransactionService {
   async getAllTransactions(userId:string, source?:'server'|'cache'|'default'): Promise<TransactionParams[]> {
     const snapshot = await this.firestore().collection('transactions')
     .where('userId', '==', userId)
-    .get({source: source ?? 'default'});
+    // .orderBy('date', 'desc')
+    .get({source: source ?? 'default'})
     return snapshot.docs.map(doc => doc.data() as TransactionParams);
   }
   async getTotalTransactionsAmountByStatus(
