@@ -5,7 +5,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {RootNavigator} from '@/navigation';
 import FlashMessage from 'react-native-flash-message';
-import {AuthProvider, MqttProvider} from '@/libs/context';
+import {AuthProvider, BluetoothContextProvider, MqttProvider, } from '@/libs/context';
 import SplashScreen from 'react-native-splash-screen';
 
 function App(): React.JSX.Element {
@@ -19,8 +19,10 @@ function App(): React.JSX.Element {
         <NavigationContainer>
           <AuthProvider>
             <MqttProvider>
+              <BluetoothContextProvider>
               <StatusBar barStyle={'default'} />
               <RootNavigator />
+              </BluetoothContextProvider>
             </MqttProvider>
           </AuthProvider>
         </NavigationContainer>
