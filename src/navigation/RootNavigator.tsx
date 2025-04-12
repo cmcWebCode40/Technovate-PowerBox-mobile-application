@@ -5,10 +5,12 @@ import {
   AddDeviceScreen,
   DeviceDetailsScreen,
   LinkAccountScreen,
+  OfflineTransactionScreen,
   PaymentScreen,
   SignInScreen,
   SignupScreen,
   SubscriptionSelectionScreen,
+  WifiSettingScreen,
 } from '@/screens';
 import {useAuthContext} from '@/libs/context';
 import {AuthStackScreens, MainStackScreens} from './type';
@@ -30,7 +32,9 @@ const MainNavigator = () => {
       <MainStack.Screen name="DeviceDetails" component={DeviceDetailsScreen} />
       <MainStack.Screen name="LinkAccount" component={LinkAccountScreen} />
       <MainStack.Screen name="Payment" component={PaymentScreen} />
+      <MainStack.Screen name="OfflineTransactions" component={OfflineTransactionScreen} />
       <MainStack.Screen name="TransactionDetails" component={TransactionDetailScreen} />
+      <MainStack.Screen name="WifiSetting" component={WifiSettingScreen} />
       <MainStack.Screen name="SubscriptionSelection" component={SubscriptionSelectionScreen} />
     </MainStack.Navigator>
   );
