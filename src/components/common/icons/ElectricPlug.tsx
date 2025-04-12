@@ -8,7 +8,7 @@ export const ElectricPlugIcon: React.FunctionComponent<SvgIconProps> = ({
   size = '29',
 }) => {
   return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none">
+    <Svg width={size} height={size} viewBox={'0 0 29 29'} fill="none">
       <Path
         d="M25 17.3012C25 16.6596 24.475 16.1346 23.8333 16.1346H21.5V18.4679H23.8333C24.475 18.4679 25 17.9429 25 17.3012ZM23.8333 20.8012H21.5V23.1346L23.8333 23.1346C24.475 23.1346 25 22.6096 25 21.9679C25 21.3262 24.475 20.8012 23.8333 20.8012ZM14.5 17.3012H12.1666L12.1666 21.9679H14.5C14.5 23.2512 15.55 24.3012 16.8333 24.3012H20.3333V14.9679H16.8333C15.55 14.9679 14.5 16.0179 14.5 17.3012Z"
         fill={color}
