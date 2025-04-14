@@ -42,7 +42,7 @@ type DefaultContext = {
   characteristics?: PeripheralServices;
   connectPeripheral: (peripheral: Peripheral) => Promise<boolean>;
   devicePowerControl: (deviceId: string) => void;
-  topUp: (deviceId: string, reference: string, amount: string) => void;
+  topUp: (deviceId: string, reference: string, amount: string) => Promise<void>;
   disconnectPeripheral: (peripheralId: string) => void;
   setupWifi: (
     ssid: string,
@@ -116,7 +116,7 @@ export const BluetoothContext = createContext<DefaultContext>({
   peripherals: new Map<Peripheral['id'], Peripheral>(),
   characteristics: undefined,
   devicePowerControl: () => undefined,
-  topUp: () => undefined,
+  topUp: async () => undefined,
   connectPeripheral: async () => false,
   disconnectPeripheral: () => undefined,
   scanAvailableDevices: () => undefined,
@@ -245,7 +245,7 @@ export const BluetoothContextProvider: React.FunctionComponent<
       'BleManagerDiscoverPeripheral',
       (peripheral: Peripheral) => {
         const wordToMatch = 'Smart Socket BLE';
-        const regex = /pb/i;
+        const regex = /\bpb_\d{13}\b/i;
         const localName = peripheral.advertising?.localName;
         if (localName && regex.test(localName)) {
           console.info(
@@ -453,6 +453,11 @@ export const BluetoothContextProvider: React.FunctionComponent<
         const dataBytes = encoder.encode(payload);
         const dataArray = Array.from(dataBytes);
         await write(dataArray, characteristics);
+        showMessage({
+          message: 'Load Request sent, please wait for confirmation',
+          type: 'info',
+          duration:5000,
+        });
       } catch (error) {
         Alert.alert('An Error occurred with your top up');
       } finally {
