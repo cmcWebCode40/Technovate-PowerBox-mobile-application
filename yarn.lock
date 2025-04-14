@@ -7208,6 +7208,11 @@ react-native-iconify@^1.0.2:
     html-react-parser "^5.1.1"
     metro-react-native-babel-preset "^0.77.0"
 
+react-native-interswitch-pay@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-interswitch-pay/-/react-native-interswitch-pay-0.2.0.tgz#2ff39b2264e7338223b78098d5392c4b8312de01"
+  integrity sha512-Ac2VAjb42jDxxphtNK7sGIYk4EMuCMRkolDIkXFOGTPfNTWLabobN0Bp2LuJywAfgoBnm8HXILjzUPMyk2CNww==
+
 react-native-iphone-screen-helper@^2.0.2:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/react-native-iphone-screen-helper/-/react-native-iphone-screen-helper-2.1.1.tgz#80e82a9badf97934f41739c58f518914b8ae1e91"
