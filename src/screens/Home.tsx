@@ -2,10 +2,8 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  ViewStyle,
   TouchableOpacity,
   Dimensions,
-  Platform,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useThemedStyles, useTransactions} from '@/libs/hooks';
@@ -38,6 +36,8 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import TransactionStatusCard from '@/components/recharge-energy-form/TransactionStatusCard';
 import transactionService, {TransactionStatus} from '@/libs/server/Transaction';
 import {BackDrop} from '@/components/common/modal/BackDrop';
+import { showMessage } from 'react-native-flash-message';
+import { ScreenLayout } from '@/components/common/layout';
 
 type TransactionStatusVerification = {
   isVerifying: boolean;
@@ -84,8 +84,22 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
     if (params?.transRef) {
       verifyTransaction();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.transRef]);
 
+
+  const handlePowerToggle = ()=>{
+    if (connectivity.deviceStatus === 'offline') {
+      showMessage({
+        message:
+          'Your inverter is offline. Connect via Bluetooth if you\'re nearby to continue.',
+        type: 'warning',
+      });
+      return;
+    }
+    devicePowerControl();
+
+  };
   const verifyTransaction = useCallback(async () => {
     try {
       if (!params?.transRef) {
@@ -142,6 +156,22 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
       type: 'AC_VOLTAGE',
       value: `${deviceReading?.acVolt?.toFixed(2)} V`,
     },
+    {
+      type: 'USAGE',
+      value: `${deviceReading?.usage?.toFixed(2)} KWh`,
+    },
+    {
+      type: 'BATTERY_HEALTH',
+      value: `${deviceReading?.battHealth?.toFixed(2)} V`,
+    },
+    {
+      type: 'DEVICE_STATE',
+      value: `${deviceReading?.deviceState}`,
+    },
+    {
+      type: 'MODE',
+      value: `${deviceReading?.mode}`,
+    },
   ];
 
   const rechargeInverter = () => {
@@ -149,7 +179,7 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
   };
 
   return (
-    <View style={style.container}>
+    <ScreenLayout style={style.container}>
       <BackDrop isLoading={transactionStatusDetails.isVerifying} />
       <Video
         source={require('../../assets/galaxy.mp4')}
@@ -194,35 +224,38 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
         </View>
         <View style={style.progressIndicatorContainer}>
           <EnergyUsageProgressIndicator balance={deviceReading.balUnit} />
-          <View
+        </View>
+        <View style={style.connectivity}>
+          <Typography variant="b1" style={[style.offlineText]}>
+            Inverter Internet Connectivity:
+          </Typography>
+          <Typography
+            variant="b1"
             style={[
-              style.offline,
+              style.offlineText,
               connectivity.deviceStatus === 'online'
                 ? style.deviceOnline
                 : style.deviceOffline,
             ]}>
-            <Typography variant="b1" style={style.offlineText}>
-              {connectivity.deviceStatus}
-            </Typography>
-          </View>
+            {connectivity.deviceStatus}
+          </Typography>
         </View>
+
         <View style={style.infoContainer}>
-          {info.map((item, index) => (
-            <View
-              style={[style.infoCard, actionCardStyle(index)]}
-              key={item.type}>
+          {info.map(item => (
+            <View style={[style.infoCard]} key={item.type}>
               <EnergyDeviceInfoCard type={item.type} value={item.value} />
             </View>
           ))}
         </View>
+        <View style={{marginBottom:'15%'}}>
         <DeviceSwitch
-          onSwitch={devicePowerControl}
+          onSwitch={handlePowerToggle}
           isLoading={loadingState.isToggling}
-          disabled={connectivity.deviceStatus === 'offline'}
           color={
             connectivity.deviceStatus === 'offline'
               ? colors.gray[200]
-              : !deviceReading.state
+              : deviceReading.state === 'off'
               ? colors.green[500]
               : colors.red[200]
           }
@@ -238,6 +271,8 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
             Recharge
           </Typography>
         </TouchableOpacity>
+        </View>
+
       </ScrollView>
       <Modal
         onClose={() => {
@@ -273,15 +308,9 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
           </>
         )}
       </Modal>
-    </View>
+    </ScreenLayout>
   );
 };
-
-const actionCardStyle = (index: number): ViewStyle => ({
-  marginRight: index % 2 === 0 ? '5%' : 0,
-  marginLeft: index % 2 !== 0 ? '5%' : 0,
-  marginTop: '3%',
-});
 
 const styles = (theme: Theme) => {
   return StyleSheet.create({
@@ -290,7 +319,8 @@ const styles = (theme: Theme) => {
       position: 'relative',
       justifyContent: 'space-between',
       paddingVertical: pixelSizeVertical(16),
-      paddingHorizontal: pixelSizeHorizontal(16),
+      paddingLeft: pixelSizeHorizontal(10),
+      paddingRight:6,
       backgroundColor: theme.colors.black[100],
     },
     greeting: {
@@ -301,18 +331,14 @@ const styles = (theme: Theme) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      ...Platform.select({
-        android: {
-          marginTop: pixelSizeVertical(24),
-        },
-        ios: {
-          marginTop: pixelSizeVertical(64),
-        },
-      }),
+      marginTop: pixelSizeVertical(24),
+      paddingHorizontal: pixelSizeHorizontal(6),
     },
     status: {
-      borderRadius: theme.radius.xxl,
-      paddingVertical: pixelSizeVertical(8),
+      borderRadius: theme.radius.full,
+      paddingVertical: pixelSizeVertical(4),
+      borderWidth: 3,
+      borderColor: theme.colors.black[300],
       paddingHorizontal: pixelSizeHorizontal(16),
     },
     statusText: {
@@ -328,26 +354,26 @@ const styles = (theme: Theme) => {
     },
     deviceStateStatus: {
       backgroundColor: theme.colors.green[500],
-      borderRadius: theme.radius.xxl,
-      paddingVertical: pixelSizeVertical(8),
+      borderRadius: theme.radius.full,
+      paddingVertical: pixelSizeVertical(4),
       paddingHorizontal: pixelSizeHorizontal(16),
     },
     deviceStateStatusText: {
       color: theme.colors.white[100],
     },
     infoContainer: {
-      flexWrap: 'wrap',
       flexDirection: 'row',
-      justifyContent: 'center',
-      // paddingHorizontal: pixelSizeHorizontal(8),
+      flexWrap: 'wrap',
+      marginBottom: '15%',
     },
     progressIndicatorContainer: {
       marginHorizontal: 'auto',
       marginVertical: pixelSizeVertical(20),
     },
     infoCard: {
-      width: '42%',
-      marginBottom: pixelSizeVertical(16),
+      width: '48%',
+      flexGrow: 1,
+      // marginBottom: pixelSizeVertical(16),
     },
     indicator: {
       height: heightPixel(20),
@@ -377,20 +403,24 @@ const styles = (theme: Theme) => {
     iconContainer: {
       height: 70,
       width: 70,
-      backgroundColor: theme.colors.green[200],
+      backgroundColor: theme.colors.blue[200],
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: theme.radius.full,
-      shadowColor: theme.colors.white[100],
+      shadowColor: theme.colors.black[200],
       shadowOffset: {width: 0, height: 2},
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 4,
+      borderWidth: 3,
+      borderColor: theme.colors.black[400],
+      marginRight:10,
     },
     textIcon: {
-      fontWeight: '600',
+      fontWeight: '700',
       marginTop: 10,
-      marginLeft: pixelSizeHorizontal(12),
+      textAlign:'center',
+      fontFamily:theme.fonts.ManropeSemibold,
     },
     backgroundVideo: {
       position: 'absolute',
@@ -402,23 +432,35 @@ const styles = (theme: Theme) => {
       height: Dimensions.get('window').height,
     },
     offline: {
-      paddingVertical: 6,
+      paddingVertical: 2,
+      paddingHorizontal: 12,
       borderRadius: theme.radius.xxl,
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: pixelSizeVertical(16),
+      width: '50%',
+      marginHorizontal: 'auto',
+      borderWidth: 3,
+      borderColor: theme.colors.black[300],
+      marginTop: pixelSizeVertical(20),
     },
     offlineText: {
-      textAlign: 'center',
+      textAlign: 'left',
       fontWeight: '600',
+      fontSize: 12,
       textTransform: 'uppercase',
+      marginRight: 4,
       fontFamily: theme.fonts.ManropeBold,
     },
     deviceOnline: {
-      backgroundColor: theme.colors.green[200],
+      color: theme.colors.green[200],
     },
     deviceOffline: {
-      backgroundColor: theme.colors.red[200],
+      color: theme.colors.red[200],
+    },
+    connectivity: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
     },
   });
 };

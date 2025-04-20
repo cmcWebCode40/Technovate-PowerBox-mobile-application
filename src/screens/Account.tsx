@@ -1,13 +1,16 @@
-import {View, StyleSheet, FlatList, Platform, Alert, Linking} from 'react-native';
+import {View, StyleSheet, FlatList, Alert, Linking, Platform} from 'react-native';
 import React, {useState} from 'react';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
 import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
-import {LogoutIcon, Typography, WhatsappIcon} from '@/components/common';
+import {LinkIcon, LogoutIcon, Typography, WhatsappIcon} from '@/components/common';
 import {useAuthContext} from '@/libs/context';
 import {ProfileInformation, SettingCard} from '@/components/settings';
 import authInstance from '@/libs/server/Auth';
 import {BackDrop} from '@/components/common/modal/BackDrop';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MainStackScreens } from '@/navigation/type';
 
 export const AccountScreen: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +24,7 @@ export const AccountScreen: React.FunctionComponent = () => {
   const avatarName = `${firstName?.charAt(0) ?? ''} ${
     lastName?.charAt(0) ?? ''
   }`;
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackScreens>>();
 
   const whatsappLink = 'https://wa.me/2347067653813';
 
@@ -66,6 +70,11 @@ export const AccountScreen: React.FunctionComponent = () => {
   };
   const userSettings = [
     {
+      title: 'Link Device',
+      image: <LinkIcon />,
+      screen: 'link-device',
+    },
+    {
       title: 'Contact Us',
       image: <WhatsappIcon />,
       screen: 'contact-us',
@@ -84,6 +93,9 @@ export const AccountScreen: React.FunctionComponent = () => {
         return;
       case 'logout':
         requestToLogout();
+        return;
+      case 'link-device':
+        navigation.navigate('LinkAccount');
         return;
     }
   };
@@ -104,6 +116,7 @@ export const AccountScreen: React.FunctionComponent = () => {
             phoneNumber={phoneNumber}
             lastName={lastName}
             firstName={firstName}
+            powerBoxId={user?.powerBoxId}
           />
         </View>
         <View style={style.list}>
@@ -160,14 +173,14 @@ const styles = (theme: Theme) => {
       backgroundColor: theme.colors.black[200],
       borderTopLeftRadius: 0,
       borderTopRightRadius: 0,
-      paddingBottom: pixelSizeVertical(46),
+      paddingBottom: '8%',
       ...Platform.select({
-        ios: {
-          paddingTop: pixelSizeVertical(48),
+        ios:{
+          paddingTop: '16%',
         },
-        android: {
-          paddingTop: pixelSizeVertical(24),
-        },
+        android:{
+          paddingTop: '5%',
+        }
       }),
     },
   });

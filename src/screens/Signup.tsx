@@ -12,7 +12,7 @@ import {useThemedStyles} from '@/libs/hooks';
 import {FormGroup} from '@/components/common/form-group';
 import * as Yup from 'yup';
 import {Theme} from '@/libs/config/theme';
-import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
+import {pixelSizeVertical} from '@/libs/utils';
 import {Formik} from 'formik';
 import AppLogo from '../../assets/images/power_box_logo.webp';
 import {PhoneNumberInput} from '@/components/common/phone-number-input';
@@ -21,6 +21,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {AuthStackScreens} from '@/navigation/type';
 import authInstance from '@/libs/server/Auth';
 import {showMessage} from 'react-native-flash-message';
+import { ScreenLayout } from '@/components/common/layout';
 
 const phoneRegExp = /^0[789]\d{9}$/;
 export const SignUpSchema = Yup.object().shape({
@@ -88,7 +89,7 @@ export const SignupScreen: React.FunctionComponent = () => {
   }
 
   return (
-    <View style={style.container}>
+    <ScreenLayout style={style.container}>
       <View style={style.header}>
         <Image style={style.image} source={AppLogo} />
       </View>
@@ -190,7 +191,7 @@ export const SignupScreen: React.FunctionComponent = () => {
           </Typography>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </ScreenLayout>
   );
 };
 
@@ -213,10 +214,6 @@ const styles = ({colors, fonts}: Theme) => {
       alignItems: 'center',
     },
     container: {
-      flex: 1,
-      paddingVertical: pixelSizeVertical(16),
-      paddingHorizontal: pixelSizeHorizontal(16),
-      backgroundColor: colors.black[100],
       justifyContent: 'center',
     },
     footer: {

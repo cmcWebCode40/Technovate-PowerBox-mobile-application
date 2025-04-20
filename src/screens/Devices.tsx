@@ -1,4 +1,4 @@
-import {View, StyleSheet, ScrollView, ViewStyle, Alert} from 'react-native';
+import {View, StyleSheet, ScrollView, Alert} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import {Theme} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
@@ -7,34 +7,44 @@ import {
   EnergyDeviceCard,
   EnergyDeviceInfoCard,
 } from '@/components/energy-device-cards';
-import {useAuthContext, useMqttContext} from '@/libs/context';
+import {useAuthContext, useBluetoothContext, useMqttContext} from '@/libs/context';
 import DevicePlanOverviewCard from '@/components/recharge-energy-form/DevicePlanOverviewCard';
 import {BatteryIcon} from '@/components/common';
 import transactionService from '@/libs/server/Transaction';
 import { showMessage } from 'react-native-flash-message';
+import { ScreenLayout } from '@/components/common/layout';
 
 export const DevicesScreen: React.FunctionComponent = () => {
   const [paidAmount] = useState<string|undefined>(undefined);
   const style = useThemedStyles(styles);
+  const {energyMetric} = useBluetoothContext();
   const {deviceReading, switchUpsMode, connectivity} = useMqttContext();
   const {user} = useAuthContext();
 
   const cells: {title: string; value: string}[] = [
     {
-      title: 'CELL 1',
-      value: `${deviceReading?.cell1?.toFixed(2)} V`,
+      title: 'Battery RCC',
+      value: `${deviceReading?.battRCC?.toFixed(2)} mAh`,
     },
     {
-      title: 'CELL 2',
-      value: `${deviceReading?.cell2?.toFixed(2)} V`,
+      title: 'Battery FCC',
+      value: `${deviceReading?.battFCC?.toFixed(2)} mAh`,
     },
     {
-      title: 'CELL 3',
-      value: `${deviceReading?.cell3?.toFixed(2)} V`,
+      title: 'Battery Current',
+      value: `${deviceReading?.chargeCurrent?.toFixed(2)} A`,
     },
     {
-      title: 'CELL 4',
-      value: `${deviceReading?.cell4?.toFixed(2)} V`,
+      title: 'Battery Health',
+      value: `${deviceReading?.battHealth?.toFixed(2)}%`,
+    },
+    {
+      title: 'Battery %',
+      value: `${deviceReading?.battPercent?.toFixed(2)}%`,
+    },
+    {
+      title: 'Battery Volt',
+      value: `${deviceReading?.battVolt?.toFixed(2)} V`,
     },
   ];
 
@@ -44,6 +54,8 @@ export const DevicesScreen: React.FunctionComponent = () => {
     (async ()=>{
        try {
         await transactionService.getTotalTransactionsAmountByStatus('SUCCESSFUL');
+          // const formatted = amount?.toFixed(2);
+          // setPaidAmount(formatted);
        } catch (error) {
         if (error instanceof Error) {
           Alert.alert(error.message);
@@ -53,13 +65,13 @@ export const DevicesScreen: React.FunctionComponent = () => {
   }, []);
 
   return (
-    <View style={style.container}>
+    <ScreenLayout style={style.container}>
       <ScrollView style={style.content}>
         <DevicePlanOverviewCard paidAmount={paidAmount} />
         <View style={style.details}>
           <EnergyDeviceCard
             socketNo={user?.powerBoxId}
-            power={''}
+            power={String(energyMetric.usage)}
             upsFlag={deviceReading.upsFlag}
             balance={deviceReading.balUnit}
             voltage={deviceReading.battVolt}
@@ -76,9 +88,9 @@ export const DevicesScreen: React.FunctionComponent = () => {
             }}
           />
           <View style={style.infoContainer}>
-            {cells.map((item, index) => (
+            {cells.map((item) => (
               <View
-                style={[style.infoCard, actionCardStyle(index)]}
+                style={[style.infoCard]}
                 key={item.title}>
                 <EnergyDeviceInfoCard
                   icon={<BatteryIcon />}
@@ -90,15 +102,10 @@ export const DevicesScreen: React.FunctionComponent = () => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </ScreenLayout>
   );
 };
 
-const actionCardStyle = (index: number): ViewStyle => ({
-  marginRight: index % 2 === 0 ? '5%' : 0,
-  marginLeft: index % 2 !== 0 ? '5%' : 0,
-  marginTop: '3%',
-});
 
 const styles = (theme: Theme) => {
   return StyleSheet.create({
@@ -114,20 +121,19 @@ const styles = (theme: Theme) => {
       marginVertical: 12,
     },
     content: {
-      marginTop: pixelSizeVertical(48),
+      marginTop: pixelSizeVertical(16),
     },
     deviceItem: {
       marginBottom: pixelSizeVertical(40),
     },
     infoContainer: {
-      flexWrap: 'wrap',
       flexDirection: 'row',
-      justifyContent: 'center',
-      // paddingHorizontal: pixelSizeHorizontal(8),
+      flexWrap: 'wrap',
+      marginHorizontal:'auto',
     },
     infoCard: {
-      width: '42%',
-      marginBottom: pixelSizeVertical(16),
+      width: '48%',
+      flexGrow:1,
     },
   });
 };

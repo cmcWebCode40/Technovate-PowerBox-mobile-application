@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
@@ -17,8 +17,6 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera';
 import {
-  pixelSizeHorizontal,
-  pixelSizeVertical,
   saveToAsyncStore,
   USER_SESSION,
 } from '@/libs/utils';
@@ -31,6 +29,7 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
 import {SettingCard} from '@/components/settings';
+import { ScreenLayout } from '@/components/common/layout';
 
 export const LinkAccountScreen: React.FunctionComponent = () => {
   const [selectedOption, setSelectedOption] = useState<'id' | 'qr' | undefined>(
@@ -46,7 +45,7 @@ export const LinkAccountScreen: React.FunctionComponent = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackScreens>>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!hasPermission) {
       requestPermission();
     }
@@ -142,14 +141,14 @@ export const LinkAccountScreen: React.FunctionComponent = () => {
 
   if (device == null) {
     return (
-      <View>
+      <ScreenLayout>
         <Typography>Device Not Found</Typography>
-      </View>
+      </ScreenLayout>
     );
   }
 
   return (
-    <View style={style.container}>
+    <ScreenLayout style={style.container}>
       <BackDrop isLoading={isLoading} />
       <View>
       {startScan && (
@@ -225,25 +224,20 @@ export const LinkAccountScreen: React.FunctionComponent = () => {
         />
       )}
       </View>
-
       <SettingCard
         screen={'logout'}
         image={<LogoutIcon />}
         onPress={handleAction}
         title={'Logout'}
       />
-    </View>
+    </ScreenLayout>
   );
 };
 
 const styles = ({colors, spacing, radius}: Theme) => {
   return StyleSheet.create({
     container: {
-      flex: 1,
-      paddingVertical: pixelSizeVertical(16),
-      paddingHorizontal: pixelSizeHorizontal(16),
-      backgroundColor: colors.black[100],
-      justifyContent:'space-between'
+      justifyContent:'space-between',
     },
     closeIcon: {
       backgroundColor: 'white',

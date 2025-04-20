@@ -1,8 +1,7 @@
 import {View, StyleSheet} from 'react-native';
 import React from 'react';
 import {useThemedStyles} from '@/libs/hooks';
-import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
-import {Theme} from '@/libs/config/theme';
+import {pixelSizeVertical} from '@/libs/utils';
 import {Button} from '@/components/common';
 import {TransactionItem} from '@/components/transactions/TransactionItem';
 import {Header} from '@/components/common/header';
@@ -10,6 +9,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
 import {useMqttContext} from '@/libs/context';
 import { useNavigation } from '@react-navigation/native';
+import { ScreenLayout } from '@/components/common/layout';
 
 type TransactionDetailScreenProps = NativeStackScreenProps<
   MainStackScreens,
@@ -30,7 +30,7 @@ export const TransactionDetailScreen: React.FunctionComponent<
     params.loadStatus === 'PENDING';
 
   return (
-    <View style={style.container}>
+    <ScreenLayout>
       <Header showHomeIcon title="Transaction Details" />
       <View style={style.content}>
         <TransactionItem
@@ -53,18 +53,12 @@ export const TransactionDetailScreen: React.FunctionComponent<
           Push Unit to Device
         </Button>
       )}
-    </View>
+    </ScreenLayout>
   );
 };
 
-const styles = ({colors}: Theme) => {
+const styles = () => {
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingVertical: pixelSizeVertical(16),
-      paddingHorizontal: pixelSizeHorizontal(16),
-      backgroundColor: colors.black[100],
-    },
     content: {
       paddingVertical: pixelSizeVertical(16),
     },

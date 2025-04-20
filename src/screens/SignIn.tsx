@@ -22,6 +22,7 @@ import {useNavigation} from '@react-navigation/native';
 import authInstance from '@/libs/server/Auth';
 import {UserInfo} from '@/libs/types/auth';
 import { saveTokenExpiration } from '@/libs/utils/authHelper';
+import { ScreenLayout } from '@/components/common/layout';
 
 export const SignInSchema = Yup.object().shape({
   email: Yup.string().required('Email is required!').trim(),
@@ -76,13 +77,13 @@ export const SignInScreen: React.FunctionComponent = () => {
 
   if (isLoadingSession) {
     return (
-      <View style={style.container}>
+      <ScreenLayout style={style.container}>
         <Spinner loading />
-      </View>
+      </ScreenLayout>
     );
   }
   return (
-    <View style={style.container}>
+    <ScreenLayout style={style.container}>
       <View style={style.header}>
         <Image source={AppLogo} />
       </View>
@@ -139,7 +140,7 @@ export const SignInScreen: React.FunctionComponent = () => {
           Don't have an account? Create one now.
         </Typography>
       </TouchableOpacity>
-    </View>
+    </ScreenLayout>
   );
 };
 
@@ -169,10 +170,6 @@ const styles = ({colors, fontSize, fonts}: Theme) => {
       backgroundColor: colors.blue[300],
     },
     container: {
-      flex: 1,
-      paddingVertical: pixelSizeVertical(16),
-      paddingHorizontal: pixelSizeHorizontal(16),
-      backgroundColor: colors.black[100],
       justifyContent: 'center',
     },
     text: {

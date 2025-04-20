@@ -75,13 +75,6 @@ const styles = ({colors, fontSize, fonts}: Theme) => {
       resizeMode: 'cover',
       justifyContent: 'center',
     },
-    container: {
-        flex: 1,
-        paddingVertical: pixelSizeVertical(16),
-        paddingHorizontal: pixelSizeHorizontal(16),
-        backgroundColor: colors.black[100],
-        justifyContent: 'center',
-      },
     overlay: {
       flex: 1,
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
