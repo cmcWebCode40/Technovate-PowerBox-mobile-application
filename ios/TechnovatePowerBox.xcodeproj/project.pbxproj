@@ -19,6 +19,7 @@
 		A0EF8AA58BBD74506DB5CEFC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		D7D47C39502B475CB48D6F5D /* Manrope-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 59A0310345B540AB835201AB /* Manrope-Light.ttf */; };
 		EEE94344D6089983FD1FFEC4 /* Pods_TechnovatePowerBox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97368447CE2540C740E39DA6 /* Pods_TechnovatePowerBox.framework */; };
+		F2265C932D9C017600AC5509 /* RCTNativeLocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = F2265C922D9C017600AC5509 /* RCTNativeLocalStorage.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,8 @@
 		C17DB44325834F529A94542D /* Manrope-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Manrope-ExtraLight.ttf"; path = "../assets/fonts/Manrope-ExtraLight.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F07D07EA85D545B69D964E6A /* Manrope-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Manrope-ExtraBold.ttf"; path = "../assets/fonts/Manrope-ExtraBold.ttf"; sourceTree = "<group>"; };
+		F2265C912D9C017600AC5509 /* RCTNativeLocalStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeLocalStorage.h; sourceTree = "<group>"; };
+		F2265C922D9C017600AC5509 /* RCTNativeLocalStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTNativeLocalStorage.m; sourceTree = "<group>"; };
 		F60A9BEAEF464337BEE03B76 /* Manrope-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Manrope-Bold.ttf"; path = "../assets/fonts/Manrope-Bold.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +87,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				F296C3E12D9C002400C63FD0 /* NativeLocalStorage */,
 				13B07FAE1A68108700A75B9A /* TechnovatePowerBox */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -127,6 +131,15 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		F296C3E12D9C002400C63FD0 /* NativeLocalStorage */ = {
+			isa = PBXGroup;
+			children = (
+				F2265C912D9C017600AC5509 /* RCTNativeLocalStorage.h */,
+				F2265C922D9C017600AC5509 /* RCTNativeLocalStorage.m */,
+			);
+			path = NativeLocalStorage;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -161,7 +174,7 @@
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1620;
 					};
 				};
 			};
@@ -299,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F2265C932D9C017600AC5509 /* RCTNativeLocalStorage.m in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -313,8 +327,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6HJ5BJBXQ8;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = TechnovatePowerBox/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PowerBox;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -326,7 +343,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.technovate.powerbox;
 				PRODUCT_NAME = TechnovatePowerBox;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -341,7 +358,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6HJ5BJBXQ8;
 				INFOPLIST_FILE = TechnovatePowerBox/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PowerBox;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -353,7 +373,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.technovate.powerbox;
 				PRODUCT_NAME = TechnovatePowerBox;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
