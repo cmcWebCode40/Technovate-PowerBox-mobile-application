@@ -29,3 +29,10 @@ export * from './Failed';
 export * from './Pending';
 export * from './Battery';
 export * from './ChargingBattery';
+export * from './DeviceState';
+export * from './ArrowBack';
+export * from './BatteryCell';
+export * from './Usage';
+export * from './Indicator';
+export * from './Link';
+

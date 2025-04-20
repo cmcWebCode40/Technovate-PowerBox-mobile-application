@@ -15,7 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackScreens, RootStackScreens} from '@/navigation/type';
 import {useAuthContext} from '@/libs/context';
-import { colors } from '@/libs/constants';
+import {colors} from '@/libs/constants';
 
 interface HeaderProps {
   title?: string;
@@ -35,7 +35,9 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackScreens>>();
   const navigateToDashboard = () => {
-    navigation.navigate<any>('Main', {screen: 'Dashboard'});
+    navigation.canGoBack()
+      ? navigation.goBack()
+      : navigation.navigate<any>('Main', {screen: 'Dashboard'});
   };
   const mainNavigation =
     useNavigation<NativeStackNavigationProp<MainStackScreens>>();
@@ -50,17 +52,20 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => mainNavigation.navigate('Account')}>
-          <AccountIcon size={44}  color={colors.white[100]}/>
+          <AccountIcon size={44} color={colors.white[100]} />
         </TouchableOpacity>
       )}
-      <Button variant="text" style={[style.btn, buttonStyles]} textStyles={[style.btnText, buttonTextStyles]}>
-       {title ?? `${user?.firstName} ${user?.lastName}`} 
+      <Button
+        variant="text"
+        style={[style.btn, buttonStyles]}
+        textStyles={[style.btnText, buttonTextStyles]}>
+        {title ?? `${user?.firstName} ${user?.lastName}`}
       </Button>
       {/* <TouchableOpacity
         onPress={() => navigation.navigate<any>('Main', {screen: 'AddDevice'})}>
         <BluetoothRoundedIcon />
       </TouchableOpacity> */}
-      <View/>
+      <View />
     </View>
   );
 };
@@ -75,12 +80,12 @@ const styles = (theme: Theme) => {
     },
     btn: {
       flexBasis: '60%',
-      backgroundColor:theme.colors.black[100],
+      backgroundColor: theme.colors.black[100],
     },
-    btnText:{
-      color:theme.colors.white[100],
-      fontWeight:'600',
-      fontSize:theme.fontSize.l,
+    btnText: {
+      color: theme.colors.white[100],
+      fontWeight: '600',
+      fontSize: theme.fontSize.l,
     },
   });
 };
