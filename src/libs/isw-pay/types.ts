@@ -28,9 +28,9 @@ export interface IswPaymentWebViewProps {
    */
   customer?: IswCustomer;
   /**
-   * Flag to indicate whether you want the customer's card to be tokenised, a tokenised value would be returned when you requery to confrim the transaction status
+   * Flag to indicate whether you want the customer's card to be tokenized, a tokenized value would be returned when you requery to confrim the transaction status
    */
-  tokeniseCard?: 'true' | 'false';
+  tokenizeCard?: 'true' | 'false';
   /**
    * Payment Item
    */
@@ -44,7 +44,7 @@ export interface IswPaymentWebViewProps {
   /**
    * transaction reference
    */
-  trnxRef?: string;
+  transactionReference?: string;
 
   /**
    * ISW merchant code

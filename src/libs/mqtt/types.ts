@@ -13,7 +13,20 @@ export interface DeviceRealTimeInfo {
   battPercent: number;
   state: 'off'|'lock'|'on'|'charging';
   upsFlag: boolean;
+  battHealth: number,
+  battRCC: number,
+  chargeCycles: number,
+  usage: number,
+  battFCC:number,
+  mode: string,
+  deviceId: string,
+  deviceState: string
+  msg?:string;
+  type?:string
+
 }
+
+
 
 export interface DeviceStatus {
   deviceStatus: 'online' | 'offline';
@@ -25,5 +38,3 @@ export interface PublishResponse {
     msg: string
     id: string
 }
-
-

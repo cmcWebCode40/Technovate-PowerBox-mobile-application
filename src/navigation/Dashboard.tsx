@@ -1,17 +1,13 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React, { useEffect } from 'react';
+import React from 'react';
 import {Theme, theme as themes} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
-import {AccountScreen, DevicesScreen, HomeScreen, TransactionScreen} from '@/screens';
+import {AccountScreen, DevicesScreen, HomeScreen, OfflineScreen, TransactionScreen} from '@/screens';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {StyleSheet, TextStyle, View} from 'react-native';
 import {HomeIcon} from '@/components/common/icons/Home';
-import {AccountIcon, AddIcon, TransactionIcon, Typography} from '@/components/common';
+import {AccountIcon, AddIcon, BluetoothAudioIcon, TransactionIcon, Typography} from '@/components/common';
 import {heightPixel, pixelSizeVertical} from '@/libs/utils';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MainStackScreens } from './type';
-import { useAuthContext } from '@/libs/context';
 
 const Tab = createBottomTabNavigator();
 
@@ -21,29 +17,15 @@ type TabBarLabelProps = {
 
 export const Dashboard = () => {
   const {tabBarStyle, container} = useThemedStyles(styles);
-  const {user} = useAuthContext();
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackScreens>>();
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (!user?.isDeviceLinked) {
-      navigation.navigate('LinkAccount');
-    }
-  }, [navigation, user?.isDeviceLinked, isFocused]);
 
   const tabLabelStyle = (focused: boolean): TextStyle => ({
-    fontWeight: '600',
-    fontSize: themes.fontSize.s,
+    fontWeight: '700',
+    fontSize: themes.fontSize.s - 2,
     fontFamily: themes.fonts.ManropeSemibold,
-    borderBottomWidth: 3,
-    width: '75%',
     margin: 'auto',
     textAlign: 'center',
     marginBottom: 10,
     paddingVertical: pixelSizeVertical(4),
-    borderBottomColor: focused
-      ? themes.colors.blue[300]
-      : themes.colors.white[100],
     color: focused ? themes.colors.blue[300] : themes.colors.white[100],
   });
 
@@ -64,6 +46,7 @@ export const Dashboard = () => {
                 <Typography variant="b2" style={tabLabelStyle(focused)}>
                   {item.name}
                 </Typography>
+
               ),
               tabBarIcon: item.icon,
             }}
@@ -102,6 +85,13 @@ const tabs = [
     ),
   },
   {
+    name: 'Offline Mode',
+    component: OfflineScreen,
+    icon: ({focused}: TabBarLabelProps) => (
+      <BluetoothAudioIcon size={'32'} color={updateIconColor(focused)} />
+    ),
+  },
+  {
     name: 'Account',
     component: AccountScreen,
     icon: ({focused}: TabBarLabelProps) => (
@@ -114,7 +104,6 @@ const styles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
-      // paddingTop: pixelSizeVertical(20),
       backgroundColor: theme.colors.black[100],
     },
     tabBarStyle: {
@@ -122,6 +111,8 @@ const styles = (theme: Theme) => {
       borderTopWidth: 0,
       minHeight: heightPixel(65),
       backgroundColor: theme.colors.black[100],
+      position: 'absolute',
+      paddingTop:10,
     },
     header: {
       paddingHorizontal: pixelSizeVertical(16),

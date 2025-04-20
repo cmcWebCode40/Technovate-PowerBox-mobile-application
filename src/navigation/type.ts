@@ -18,6 +18,8 @@ export type MainStackScreens = {
   Devices: undefined;
   SubscriptionSelection: undefined;
   LinkAccount: undefined;
+  WifiSetting: undefined;
+  OfflineTransactions: undefined;
   Payment: DeviceRechargePayload;
   Dashboard:{transRef?: string};
   DeviceDetails?: {

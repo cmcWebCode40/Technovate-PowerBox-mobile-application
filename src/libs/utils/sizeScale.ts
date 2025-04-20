@@ -27,3 +27,10 @@ export {
   pixelSizeVertical,
   pixelSizeHorizontal,
 };
+
+export const createHitSlop = (value: number) => ({
+  top: value,
+  bottom: value,
+  left: value,
+  right: value,
+});

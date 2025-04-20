@@ -16,12 +16,13 @@ interface ProfileInformationProps {
   address?: string;
   meterType?: string;
   email?: string;
+  powerBoxId?: string;
   phoneNumber?: string;
 }
 
 export const ProfileInformation: React.FunctionComponent<
   ProfileInformationProps
-> = ({avatarName, firstName, lastName, email, phoneNumber}) => {
+> = ({avatarName, firstName, lastName, email, phoneNumber, powerBoxId}) => {
   const style = useThemedStyles(styles);
 
   return (
@@ -39,6 +40,13 @@ export const ProfileInformation: React.FunctionComponent<
         </Typography>
         <Typography style={style.body}>{email}</Typography>
         <Typography style={style.body}>{phoneNumber}</Typography>
+        {powerBoxId && (
+          <View style={style.boxIdContainer}>
+            <Typography style={style.boxId} variant="b2">
+             BOX ID: {powerBoxId}
+            </Typography>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -72,6 +80,9 @@ const styles = (theme: Theme) => {
       alignItems: 'center',
       height: 80,
       width: 80,
+      paddingVertical: pixelSizeVertical(4),
+      borderWidth: 0.3,
+      borderColor: theme.colors.blue[300],
     },
     avatarText: {
       lineHeight: heightPixel(32),
@@ -86,6 +97,20 @@ const styles = (theme: Theme) => {
       backgroundColor: theme.colors.gray[400],
       paddingHorizontal: pixelSizeHorizontal(8),
       paddingVertical: pixelSizeVertical(4),
+    },
+    boxIdContainer: {
+      borderRadius: theme.radius.xxl,
+      backgroundColor: theme.colors.black[300],
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: pixelSizeVertical(4),
+      borderWidth: 0.3,
+      borderColor: theme.colors.blue[300],
+    },
+    boxId: {
+      color: theme.colors.blue[300],
+      fontWeight: '500',
+      fontFamily: theme.fonts.ManropeSemibold,
     },
   });
 };

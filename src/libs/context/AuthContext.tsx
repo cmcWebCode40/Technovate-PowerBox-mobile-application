@@ -51,9 +51,9 @@ export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
   }, []);
 
   const clearUser = useCallback(async () => {
+    setIsAuthenticated(false);
     setUser(undefined);
     await deleteFromAsyncStore(USER_SESSION);
-    setIsAuthenticated(false);
   }, []);
 
 

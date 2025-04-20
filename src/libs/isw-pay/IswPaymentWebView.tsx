@@ -5,15 +5,15 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 import {
   WebView,
   type WebViewNavigation,
   type WebViewMessageEvent,
 } from 'react-native-webview';
-import { getHtmlInputsFields, getWebCheckoutHtmlContent } from './utils';
-import { BackDrop } from '@/components/common/modal/BackDrop';
-import { IswPaymentWebViewProps, IswWebViewRefMethods } from './types';
+import {getHtmlInputsFields, getWebCheckoutHtmlContent} from './utils';
+import {BackDrop} from '@/components/common/modal/BackDrop';
+import {IswPaymentWebViewProps, IswWebViewRefMethods} from './types';
 
 const DefaultRedirectUrl = 'https://newwebpay.interswitchng.com/';
 
@@ -22,23 +22,23 @@ const IswPaymentWebView: React.ForwardRefRenderFunction<
   IswPaymentWebViewProps
 > = (
   {
-    trnxRef,
     mode,
     onCompleted,
     payItem,
     accessToken,
     merchantCode,
-    tokeniseCard,
     amount,
-    currency = 566,
     customer,
     autoStart,
     onWebMessage,
     checkoutUrl,
+    tokenizeCard,
     splitAccounts,
+    currency = 566,
+    transactionReference,
     redirectUrl = DefaultRedirectUrl,
   },
-  ref
+  ref,
 ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -60,17 +60,17 @@ const IswPaymentWebView: React.ForwardRefRenderFunction<
   }));
 
   const inputs = getHtmlInputsFields({
-    amount,
-    currency,
     mode,
     payItem,
+    amount,
+    currency,
     accessToken,
     customer,
     merchantCode,
-    tokeniseCard,
-    trnxRef,
+    tokenizeCard,
     redirectUrl,
     splitAccounts,
+    transactionReference,
   });
 
   const htmlContent = getWebCheckoutHtmlContent(checkoutUrl, inputs);
@@ -89,7 +89,6 @@ const IswPaymentWebView: React.ForwardRefRenderFunction<
     }
   };
 
-
   return (
     <>
       {openModal ? (
@@ -97,7 +96,7 @@ const IswPaymentWebView: React.ForwardRefRenderFunction<
           ref={webViewRef}
           cacheMode={'LOAD_DEFAULT'}
           onMessage={onMessageHandler}
-          source={{ html: htmlContent }}
+          source={{html: htmlContent}}
           onLoadStart={() => setIsLoading(true)}
           onLoadEnd={() => setIsLoading(false)}
           onError={() => {
@@ -106,8 +105,8 @@ const IswPaymentWebView: React.ForwardRefRenderFunction<
           style={[style.flex]}
           onNavigationStateChange={handleNavigationStateChange}
         />
-       ) : null}
-      <BackDrop  isLoading={isLoading} />
+      ) : null}
+      <BackDrop isLoading={isLoading} />
     </>
   );
 };
