@@ -226,16 +226,7 @@ export const BluetoothContextProvider: React.FunctionComponent<
 
   useEffect(() => {
     handleAndroidPermissions();
-    BleManager.checkState().then(state => {
-      if (state !== 'on') {
-        BleManager.enableBluetooth().then(() => {
-          showMessage({
-            message: 'Bluetooth Enabled ',
-            type: 'success',
-          });
-        });
-      }
-    });
+
 
     BleManager.start({showAlert: false}).then(() => {
       console.info('BleManager initialized');
@@ -274,16 +265,20 @@ export const BluetoothContextProvider: React.FunctionComponent<
       'BleManagerDisconnectPeripheral',
       handleDisconnections,
     );
-    BleManager.getConnectedPeripherals([]).then(async connectedPeripherals => {
-      const discoveredDevice = Array.from(connectedPeripherals.values())[0];
-      if (Array.from(peripherals.values()).length < 1 && discoveredDevice) {
-        connectPeripheral({
-          advertising: discoveredDevice?.advertising,
-          id: discoveredDevice?.id,
-          rssi: discoveredDevice?.rssi,
-        });
-        setPeripherals(map => {
-          return new Map(map.set(discoveredDevice.id, discoveredDevice));
+    BleManager.checkState().then(state => {
+      if (state === 'on') {
+        BleManager.getConnectedPeripherals([]).then(async connectedPeripherals => {
+          const discoveredDevice = Array.from(connectedPeripherals.values())[0];
+          if (Array.from(peripherals.values()).length < 1 && discoveredDevice) {
+            connectPeripheral({
+              advertising: discoveredDevice?.advertising,
+              id: discoveredDevice?.id,
+              rssi: discoveredDevice?.rssi,
+            });
+            setPeripherals(map => {
+              return new Map(map.set(discoveredDevice.id, discoveredDevice));
+            });
+          }
         });
       }
     });
