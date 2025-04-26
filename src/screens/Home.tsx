@@ -141,15 +141,15 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
   const info: {type: DeviceInfoStatus; value: string}[] = [
     {
       type: 'AC_CURRENT',
-      value: `${deviceReading?.battPercent?.toFixed(2)}%`,
+      value: `${deviceReading?.battPercent?.toFixed(2)} %`,
     },
     {
       type: 'POWER_CONSUMPTION',
-      value: `${deviceReading?.chargeCurrent?.toFixed(2)} W`,
+      value: `${deviceReading?.power?.toFixed(2)} W`,
     },
     {
       type: 'FREQUENCY',
-      value: `${deviceReading?.battVolt?.toFixed(2)} KWh`,
+      value: `${deviceReading?.frequency?.toFixed(2) ?? '0'} Hz`,
     },
     {
       type: 'AC_VOLTAGE',
@@ -161,7 +161,7 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
     },
     {
       type: 'BATTERY_HEALTH',
-      value: `${deviceReading?.battHealth?.toFixed(2)} V`,
+      value: `${deviceReading?.battHealth?.toFixed(2)} %`,
     },
     {
       type: 'DEVICE_STATE',
@@ -247,6 +247,7 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
             </View>
           ))}
         </View>
+        <View style={{marginBottom:'15%'}}>
         <DeviceSwitch
           onSwitch={handlePowerToggle}
           isLoading={loadingState.isToggling}
@@ -269,6 +270,8 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
             Recharge
           </Typography>
         </TouchableOpacity>
+        </View>
+
       </ScrollView>
       <Modal
         onClose={() => {
@@ -367,7 +370,7 @@ const styles = (theme: Theme) => {
       marginVertical: pixelSizeVertical(20),
     },
     infoCard: {
-      width: '33%',
+      width: '48%',
       flexGrow: 1,
       // marginBottom: pixelSizeVertical(16),
     },

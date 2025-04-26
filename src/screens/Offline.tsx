@@ -27,11 +27,11 @@ export const OfflineScreen: React.FunctionComponent = () => {
   const cells: {title: string; value: string}[] = [
     {
       title: 'Battery RCC',
-      value: `${energyMetric?.battRCC?.toFixed(2)} mAh`,
+      value: `${energyMetric?.battRCC?.toFixed(2)} Ah`,
     },
     {
       title: 'Battery FCC',
-      value: `${energyMetric?.battFCC?.toFixed(2)} mAh`,
+      value: `${energyMetric?.battFCC?.toFixed(2)} Ah`,
     },
     {
       title: 'Battery Current',
@@ -54,15 +54,15 @@ export const OfflineScreen: React.FunctionComponent = () => {
   const info: {type: DeviceInfoStatus; value: string}[] = [
     {
       type: 'POWER_CONSUMPTION',
-      value: `${energyMetric?.chargeCurrent?.toFixed(2)} W`,
+      value: `${energyMetric?.power?.toFixed(2)}W`,
     },
     {
       type: 'FREQUENCY',
-      value: '50HZ',
+      value: `${energyMetric?.frequency?.toFixed(2)}Hz`,
     },
     {
       type: 'AC_VOLTAGE',
-      value: `${energyMetric?.acVolt?.toFixed(2)} V`,
+      value: `${energyMetric?.acVolt?.toFixed(2)}V`,
     },
     {
       type: 'USAGE',
@@ -102,7 +102,7 @@ export const OfflineScreen: React.FunctionComponent = () => {
 
   return (
     <View style={style.container}>
-      <ScrollView style={style.content}>
+      <ScrollView style={style.content} showsVerticalScrollIndicator={false}>
         <Typography style={style.header}>Offline Mode</Typography>
         <View style={style.details}>
           <OfflineOverview
@@ -211,7 +211,7 @@ const styles = (theme: Theme) => {
       marginBottom: 16,
     },
     infoCard: {
-      width: '33%',
+      width: '48%',
       flexGrow: 1,
     },
     header: {
@@ -222,6 +222,7 @@ const styles = (theme: Theme) => {
       alignItems: 'center',
       justifyContent: 'space-between',
       marginTop: 24,
+      marginBottom:'15%',
     },
     btnActions: {
       width: '48%',
