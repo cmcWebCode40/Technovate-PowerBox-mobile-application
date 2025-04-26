@@ -3,7 +3,6 @@ import React from 'react';
 import {Dashboard} from './Dashboard';
 import {
   AddDeviceScreen,
-  DeviceDetailsScreen,
   LinkAccountScreen,
   OfflineTransactionScreen,
   PaymentScreen,
@@ -29,7 +28,6 @@ const MainNavigator = () => {
       }}>
       <MainStack.Screen name="Dashboard" component={Dashboard} />
       <MainStack.Screen name="AddDevice" component={AddDeviceScreen} />
-      <MainStack.Screen name="DeviceDetails" component={DeviceDetailsScreen} />
       <MainStack.Screen name="LinkAccount" component={LinkAccountScreen} />
       <MainStack.Screen name="Payment" component={PaymentScreen} />
       <MainStack.Screen name="OfflineTransactions" component={OfflineTransactionScreen} />
