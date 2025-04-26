@@ -65,7 +65,7 @@ declare module 'react-native-ble-manager' {
   }
 }
 
-function sleep(ms: number) {
+export function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(resolve, ms));
 }
 
