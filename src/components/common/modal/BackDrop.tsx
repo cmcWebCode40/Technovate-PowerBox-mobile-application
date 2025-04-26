@@ -28,9 +28,9 @@ export const BackDrop: React.FunctionComponent<BackDropProps> = ({
       accessibilityHint="activity-indicator"
       visible={isLoading}
       {...otherModalProps}>
-      <View testID="centered-view" style={styles.centeredView}>
+      <View style={styles.centeredView}>
         <ActivityIndicator
-          testID="activity-indicator"
+          accessibilityHint="activity-indicator"
           color={colors.blue[100]}
         />
       </View>

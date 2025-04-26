@@ -34,3 +34,4 @@ export * from './ArrowBack';
 export * from './BatteryCell';
 export * from './Usage';
 export * from './Indicator';
+export * from './Link';
