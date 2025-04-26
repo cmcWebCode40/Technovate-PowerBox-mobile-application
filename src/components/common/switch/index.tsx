@@ -1,10 +1,9 @@
 import {theme} from '@/libs/config/theme';
 import React from 'react';
-import {StyleProp, Switch, ViewStyle} from 'react-native';
+import {StyleProp, StyleSheet, Switch, ViewStyle} from 'react-native';
 
 interface SwitchIconProps {
   style?: StyleProp<ViewStyle>;
-  state?: 'on' | 'off';
   isEnabled?: boolean;
   onChange?: (state: boolean) => void;
 }
@@ -25,7 +24,14 @@ export const SwitchIcon: React.FunctionComponent<SwitchIconProps> = ({
       ios_backgroundColor={gray[200]}
       onValueChange={onChange}
       value={isEnabled}
-      style={style}
+      style={[styles.switch, style]}
+
     />
   );
 };
+
+const styles = StyleSheet.create({
+  switch: {
+    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+  },
+});

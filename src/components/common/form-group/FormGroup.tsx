@@ -11,9 +11,10 @@ import React, {useState} from 'react';
 import {ClosedEyeIcon, OpenEyeIcon} from '../icons';
 import {Typography} from '../typography';
 import {Theme} from '@/libs/config/theme';
-import {fontPixel, pixelSizeVertical} from '@/libs/utils';
+import {createHitSlop, fontPixel, pixelSizeVertical} from '@/libs/utils';
 import {TextField} from './TextField';
 import {useThemedStyles} from '@/libs/hooks';
+import { colors } from '@/libs/constants';
 
 interface FormGroupProps extends TextInputProps {
   label?: string;
@@ -49,6 +50,8 @@ export const FormGroup: React.FunctionComponent<FormGroupProps> = ({
           style={[style.input, inputStyle]}
           secureTextEntry={usePassword ? !showPassword : undefined}
           {...otherTextInputProps}
+          hitSlop={createHitSlop(20)}
+          placeholderTextColor={colors.white[100]}
         />
         {usePassword && (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -72,7 +75,7 @@ const styles = (theme: Theme) => {
       fontWeight: '600',
       fontSize: fontPixel(theme.fontSize.l),
       textTransform: 'capitalize',
-      color: theme.colors.black[300],
+      color: theme.colors.white[100],
       fontFamily: theme.fonts.ManropeRegular,
     },
     error: {
@@ -83,12 +86,13 @@ const styles = (theme: Theme) => {
       flexDirection: 'row',
       alignItems: 'center',
       borderRadius: theme.radius.lg,
-      backgroundColor: theme.colors.white[300],
+      backgroundColor: theme.colors.black[200],
     },
     input: {
       flexBasis: '92%',
       fontSize: fontPixel(theme.fontSize.l),
-      color: theme.colors.black[200],
+      color: theme.colors.red[100],
+      backgroundColor: theme.colors.black[200],
     },
     showPasswordText: {
       fontWeight: '700',

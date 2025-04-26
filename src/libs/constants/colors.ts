@@ -3,6 +3,7 @@ export const colors = {
     100: '#15ABFF',
     200:'#1e90ff',
     300:'#298ef2',
+    400:'#298ef0',
   },
   green: {
     100: '#EEFDF3',

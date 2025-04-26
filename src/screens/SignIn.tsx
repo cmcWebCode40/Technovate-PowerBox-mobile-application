@@ -1,6 +1,6 @@
-import {Alert, Image, StyleSheet, View} from 'react-native';
+import {Alert, Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
-import {Button} from '@/components/common';
+import {Button, Typography} from '@/components/common';
 import {useThemedStyles} from '@/libs/hooks';
 import {FormGroup} from '@/components/common/form-group';
 import * as Yup from 'yup';
@@ -16,45 +16,60 @@ import {useAuthContext} from '@/libs/context';
 import {Formik} from 'formik';
 import AppLogo from '../../assets/images/power_box_logo.webp';
 import {Spinner} from '@/components/common/loader/index.';
+import {AuthStackScreens} from '@/navigation/type';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
+import authInstance from '@/libs/server/Auth';
+import {UserInfo} from '@/libs/types/auth';
+import { saveTokenExpiration } from '@/libs/utils/authHelper';
 
 export const SignInSchema = Yup.object().shape({
   email: Yup.string().required('Email is required!').trim(),
   password: Yup.string().required('Password is required!').trim(),
 });
 
-const USER_EMAIL = 'technovate.dev@gmail.com';
-const USER_PASSWORD = 'Dev123';
+const isDev  = process.env.NODE_ENV === 'development';
 
 const formInitialValues = {
-  email: '',
-  password: '',
+  email:  isDev ? 'infinity_michael@yahoo.com' : '',
+  password: isDev ? '1234567890' : '',
 };
 
 export const SignInScreen: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const {updateUser, isLoadingSession} = useAuthContext();
   const style = useThemedStyles(styles);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AuthStackScreens>>();
 
   const handleLogin = async (payload: typeof formInitialValues) => {
-    setIsLoading(true);
-    setTimeout(() => {
+    try {
+      setIsLoading(true);
+      const trimmedEmail = payload.email.trim();
+      const session = await authInstance.signIn(
+        trimmedEmail,
+        payload.password,
+      );
+      const user = await authInstance.getUserProfile(session.uid);
+      const userInfo: UserInfo = {
+        ...user,
+        userId: session.uid,
+        emailVerified: session.emailVerified,
+        creationTime: session.metadata.creationTime,
+      };
+      await saveToAsyncStore(USER_SESSION, userInfo);
+      const DEFAULT_SESSION_EXPIRATION = 12 * 60 * 60; // 3 hours in seconds
+      await saveTokenExpiration(DEFAULT_SESSION_EXPIRATION);
+      updateUser(userInfo);
+    } catch (error) {
+      Alert.alert('Login Error:', authInstance.handleError(error));
+    } finally {
       setIsLoading(false);
-    }, 3000);
-    if (
-      payload.email.toLocaleLowerCase().trim() !==
-        USER_EMAIL.toLocaleLowerCase() ||
-      payload.password !== USER_PASSWORD
-    ) {
-      Alert.alert('Incorrect email or password');
-      return;
     }
-    const user = {
-      email: payload.email,
-      firstName: 'Technovate',
-      lastName: 'Tester',
-    };
-    await saveToAsyncStore(USER_SESSION, user);
-    updateUser(user);
+  };
+
+  const signIn = () => {
+    navigation.navigate('SignUp');
   };
 
   if (isLoadingSession) {
@@ -111,12 +126,17 @@ export const SignInScreen: React.FunctionComponent = () => {
                 handleSubmit();
               }}
               style={style.button}
-              variant="filled">
-              Login In
+              variant="contained">
+              Login
             </Button>
           </>
         )}
       </Formik>
+      <TouchableOpacity onPress={signIn} style={style.footer}>
+        <Typography variant="b1" style={style.footerText}>
+          Don't have an account? Create one now.
+        </Typography>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -157,6 +177,19 @@ const styles = ({colors, fontSize, fonts}: Theme) => {
       color: colors.gray[200],
       fontSize: fontPixel(fontSize.s),
       marginLeft: pixelSizeHorizontal(4),
+    },
+    footer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: pixelSizeVertical(24),
+    },
+    footerText: {
+      textAlign: 'center',
+      color: colors.blue[100],
+      fontWeight: '600',
+      lineHeight: 24,
+      textDecorationLine: 'underline',
+      fontFamily: fonts.ManropeBold,
     },
   });
 };

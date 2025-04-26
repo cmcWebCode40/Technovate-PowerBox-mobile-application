@@ -14,7 +14,7 @@ export const TextField: React.FunctionComponent<TextInputProps> = ({
     <TextInput
       {...otherTextInputProps}
       style={[textInputStyles.container, style]}
-      placeholderTextColor={colors.black[300]}
+      placeholderTextColor={colors.gray[500]}
     />
   );
 };
@@ -24,7 +24,7 @@ const styles = (theme: Theme) => {
     container: {
       paddingHorizontal: pixelSizeHorizontal(14),
       borderRadius: theme.radius.md,
-      color: theme.colors.black[100],
+      color: theme.colors.white[100],
       backgroundColor: colors.white[300],
       ...Platform.select({
         ios: {

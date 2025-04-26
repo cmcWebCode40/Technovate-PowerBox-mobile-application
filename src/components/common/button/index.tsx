@@ -128,7 +128,7 @@ const styles = (theme: Theme) => {
       fontSize: fontPixel(theme.fontSize.l),
     },
     contained: {
-      backgroundColor: theme.colors.orange[200],
+      backgroundColor: theme.colors.blue[200],
       borderRadius: theme.radius.lg,
     },
     outlined: {
@@ -143,7 +143,7 @@ const styles = (theme: Theme) => {
       color: theme.colors.black[100],
     },
     containedText: {
-      color: theme.colors.orange[400],
+      color: theme.colors.white[100],
     },
     outLineText: {
       color: theme.colors.gray[200],

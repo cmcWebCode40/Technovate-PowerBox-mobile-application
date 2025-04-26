@@ -1,4 +1,4 @@
-import {View, TextInput, StyleSheet} from 'react-native';
+import {View, TextInput, StyleSheet, Alert} from 'react-native';
 import React, {useState} from 'react';
 import {Button, Typography} from '../common';
 import {Theme} from '@/libs/config/theme';
@@ -7,7 +7,7 @@ import {pixelSizeVertical} from '@/libs/utils';
 
 interface RechargeEnergyFormProps {
   isLoading:boolean
-  rechargeMeter: (unit: string) => void;
+  rechargeMeter: (unit: number) => void;
 }
 
 export const RechargeEnergyForm: React.FunctionComponent<
@@ -16,15 +16,19 @@ export const RechargeEnergyForm: React.FunctionComponent<
   const style = useThemedStyles(styles);
   const [unit, setUnit] = useState<string | undefined>('1');
   const [amount, setAmount] = useState(100);
+  const [calcAmount, setCalcAmount] = useState<string|undefined>(undefined);
 
   const submit = () => {
-    if (unit) {
-      rechargeMeter(unit);
+    if (!calcAmount) {
+      Alert.alert('unit required');
+      return;
     }
+    rechargeMeter(Number(calcAmount));
   };
 
   const handleChange = (text: string) => {
     const eqUint = parseInt(text, 10) / 100;
+    setCalcAmount(text);
     if (parseInt(text, 10)) {
       setAmount(parseInt(text, 10));
     }else{
@@ -41,17 +45,18 @@ export const RechargeEnergyForm: React.FunctionComponent<
       <TextInput
         style={style.input}
         keyboardType="number-pad"
-        placeholder="Enter Amount"
+        placeholder="Enter Aunt"
         editable={!isLoading}
+        value={calcAmount}
         onChangeText={handleChange}
         placeholderTextColor={'#9095A1'}
       />
       <View style={style.conversionLayout}>
-        <Typography>{Number(unit).toFixed(1)}</Typography>
-        <Typography> = ₦{amount}</Typography>
+      <Typography> ₦{amount} </Typography>
+        <Typography>= {Number(unit)?.toFixed(1)}</Typography>
       </View>
-      <Button variant="filled" disabled={!unit || isLoading} loading={isLoading} onPress={submit}>
-        Send
+      <Button variant="contained" disabled={!unit || isLoading} loading={isLoading} onPress={submit}>
+        Proceed
       </Button>
     </View>
   );

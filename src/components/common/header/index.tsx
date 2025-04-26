@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {Button} from '../button';
-import {AccountIcon, HomeRoundedIcon} from '../icons';
+import {AccountIcon, ArrowBackIcon} from '../icons';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
 import {useNavigation} from '@react-navigation/native';
@@ -25,6 +25,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FunctionComponent<HeaderProps> = ({
+  title,
   buttonStyles,
   showHomeIcon,
   buttonTextStyles,
@@ -43,7 +44,7 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
     <View style={style.container}>
       {showHomeIcon ? (
         <TouchableOpacity activeOpacity={0.7} onPress={navigateToDashboard}>
-          <HomeRoundedIcon />
+          <ArrowBackIcon color={'white'} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
@@ -53,7 +54,7 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
         </TouchableOpacity>
       )}
       <Button variant="text" style={[style.btn, buttonStyles]} textStyles={[style.btnText, buttonTextStyles]}>
-        {user?.firstName} {user?.lastName}
+       {title ?? `${user?.firstName} ${user?.lastName}`} 
       </Button>
       {/* <TouchableOpacity
         onPress={() => navigation.navigate<any>('Main', {screen: 'AddDevice'})}>
