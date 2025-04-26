@@ -4,15 +4,18 @@ import {
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
-
 import {MainStackScreens} from '@/navigation/type';
-import IswPaymentWebView from '@/libs/isw-pay/IswPaymentWebView';
-import { Config } from '@/libs/config/keys';
-
+import {Config} from '@/libs/config/keys';
+import {StyleSheet} from 'react-native';
+import { IswPaymentWebView } from 'react-native-interswitch-pay';
+import { ScreenLayout } from '@/components/common/layout';
+import { colors } from '@/libs/constants';
 
 export type IswTestMode = 'TEST' | 'LIVE';
 
 type PaymentScreenProps = NativeStackScreenProps<MainStackScreens, 'Payment'>;
+
+type TIswPaymentWebView = React.ComponentRef<typeof IswPaymentWebView>;
 
 export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
   route,
@@ -32,9 +35,10 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
     mode,
     transactionRef,
   } = params;
+  const IswWebViewRef = React.useRef<TIswPaymentWebView>(null);
 
   const navigator = useCallback(
-    (navParams?: {transRef: string, amount:number}) => {
+    (navParams?: {transRef: string; amount: number}) => {
       navigation.navigate<any>('Dashboard', {
         screen: 'Home',
         params: navParams,
@@ -46,17 +50,17 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
   const handleCallback = () => {
     setAutoStart(false);
     navigator({
-      amount : amount,
+      amount: amount,
       transRef: transactionRef,
     });
   };
 
-
   return (
-    <>
+    <ScreenLayout style={styles.container}>
       {params.merchantCode ? (
         <IswPaymentWebView
           amount={amount}
+          ref={IswWebViewRef}
           currency={currency}
           mode={mode as IswTestMode}
           autoStart={autoStart}
@@ -65,13 +69,21 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
             name: customerName,
             id: customerId,
           }}
+          indicatorColor={colors.blue[100]}
           payItem={{id: payItemId}}
-          trnxRef={transactionRef}
           merchantCode={merchantCode}
           onCompleted={handleCallback}
+          transactionReference={transactionRef}
           checkoutUrl={Config.ISW_WEB_CHECKOUT_URL}
         />
       ) : null}
-    </>
+    </ScreenLayout>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#fff',
+    paddingHorizontal: (0),
+  },
+});
