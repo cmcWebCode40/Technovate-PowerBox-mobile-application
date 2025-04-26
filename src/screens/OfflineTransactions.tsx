@@ -7,9 +7,11 @@ import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {Theme} from '@/libs/config/theme';
 import transactionService, {TransactionParams} from '@/libs/server/Transaction';
 import {TransactionItem} from '@/components/transactions/TransactionItem';
-import {useAuthContext} from '@/libs/context';
-import {useIsFocused} from '@react-navigation/native';
-import { Header } from '@/components/common/header';
+import {useAuthContext, useBluetoothContext} from '@/libs/context';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {Header} from '@/components/common/header';
+import {BackDrop} from '@/components/common/modal/BackDrop';
+import {showMessage} from 'react-native-flash-message';
 
 export const OfflineTransactionScreen: React.FunctionComponent = () => {
   const [transactions, setTransactions] = useState<
@@ -19,6 +21,8 @@ export const OfflineTransactionScreen: React.FunctionComponent = () => {
   const style = useThemedStyles(styles);
   const {user} = useAuthContext();
   const isFocused = useIsFocused();
+  const {topUp, loadingState} = useBluetoothContext();
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!user?.userId) {
@@ -31,7 +35,9 @@ export const OfflineTransactionScreen: React.FunctionComponent = () => {
           user.userId,
           'server',
         );
-        const pendingTransactions = response.filter(item => item.status === 'SUCCESSFUL' && item.loadStatus === 'PENDING');
+        const pendingTransactions = response.filter(
+          item => item.status === 'SUCCESSFUL' && item.loadStatus === 'PENDING',
+        );
         setTransactions(pendingTransactions);
       } catch (error) {
         Alert.alert('Error fetching data');
@@ -41,9 +47,26 @@ export const OfflineTransactionScreen: React.FunctionComponent = () => {
     })();
   }, [user?.userId, isFocused]);
 
+  const handleTopUp = async (transRef: string, amount: string | number) => {
+    if (user?.powerBoxId) {
+      try {
+        await topUp(user?.powerBoxId, transRef, String(amount));
+        await transactionService.updateLoadStatus(transRef, 'SUCCESSFUL');
+        navigation.goBack();
+      } catch (error) {
+        showMessage({
+          message: 'Error updating load status',
+          type: 'danger',
+        });
+        await transactionService.updateLoadStatus(transRef, 'FAILED');
+      }
+    }
+  };
+
   return (
     <View style={style.container}>
-        <Header showHomeIcon title="Pending Recharge" />
+      <BackDrop isLoading={loadingState.isRecharging} />
+      <Header showHomeIcon title="Pending Recharge" />
       {isLoading ? (
         <Spinner loading={isLoading} />
       ) : (
@@ -58,7 +81,7 @@ export const OfflineTransactionScreen: React.FunctionComponent = () => {
                 amount={item.amount}
                 status={item.status}
                 isOfflineMode={true}
-                loadUnit={()=>{}}
+                loadUnit={handleTopUp}
                 loadStatus={item.loadStatus}
               />
             )}

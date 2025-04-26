@@ -9,7 +9,9 @@ import {Header} from '@/components/common/header';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
 import {useMqttContext} from '@/libs/context';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {showMessage} from 'react-native-flash-message';
+import transactionService from '@/libs/server/Transaction';
 
 type TransactionDetailScreenProps = NativeStackScreenProps<
   MainStackScreens,
@@ -21,13 +23,31 @@ export const TransactionDetailScreen: React.FunctionComponent<
 > = ({route: {params}}) => {
   const style = useThemedStyles(styles);
   const {deviceUnitTopUp, loadingState, connectivity} = useMqttContext();
-  const navigation =
-  useNavigation();
+  const navigation = useNavigation();
 
   const shouldShowLoadUnitButton =
     connectivity.deviceStatus === 'online' &&
     params.status === 'SUCCESSFUL' &&
     params.loadStatus === 'PENDING';
+
+  const handleTopUp = async () => {
+    try {
+      await deviceUnitTopUp(params.amount as string, params.transRef);
+      await transactionService.updateLoadStatus(params.transRef, 'SUCCESSFUL');
+      showMessage({
+        message: 'Load Request sent, please wait for confirmation',
+        type: 'info',
+        duration: 5000,
+      });
+      navigation.goBack();
+    } catch (error) {
+      showMessage({
+        message: 'Error updating load status',
+        type: 'danger',
+      });
+      await transactionService.updateLoadStatus(params.transRef, 'FAILED');
+    }
+  };
 
   return (
     <View style={style.container}>
@@ -45,11 +65,7 @@ export const TransactionDetailScreen: React.FunctionComponent<
         <Button
           loading={loadingState.isRecharging}
           disabled={loadingState.isRecharging}
-          onPress={() => {
-            deviceUnitTopUp(params.amount as string, params.transRef).then(()=>{
-              navigation.goBack();
-            });
-          }}>
+          onPress={handleTopUp}>
           Push Unit to Device
         </Button>
       )}

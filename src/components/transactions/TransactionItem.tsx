@@ -14,7 +14,7 @@ type TransactionItemProps = {
   amount: string | number;
   loadStatus?: any;
   isOfflineMode?: boolean;
-  loadUnit?: () => void;
+  loadUnit?: (transRef:string, amount:string | number) => void;
   status: 'SUCCESSFUL' | 'FAILED' | 'PENDING';
 };
 
@@ -32,7 +32,6 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackScreens>>();
 
-  // Determine status color
   const statusColor =
     status === 'SUCCESSFUL'
       ? style.successText
@@ -88,7 +87,11 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
         </Typography>
       </View>
       {isOfflineMode && (
-        <Button style={style.btn} onPress={loadUnit} size="sm">
+        <Button style={style.btn} onPress={()=>{
+          if (loadUnit) {
+            loadUnit(transRef, amount);
+          }
+        }} size="sm">
           Load Unit via Bluetooth
         </Button>
       )}
