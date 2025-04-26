@@ -1,14 +1,15 @@
 import {
+  View,
   Alert,
   Image,
   ScrollView,
   StyleSheet,
+  DimensionValue,
   TouchableOpacity,
-  View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Typography} from '@/components/common';
-import {useThemedStyles} from '@/libs/hooks';
+import {useKeyboardStatus, useThemedStyles} from '@/libs/hooks';
 import {FormGroup} from '@/components/common/form-group';
 import * as Yup from 'yup';
 import {Theme} from '@/libs/config/theme';
@@ -21,7 +22,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {AuthStackScreens} from '@/navigation/type';
 import authInstance from '@/libs/server/Auth';
 import {showMessage} from 'react-native-flash-message';
-import { ScreenLayout } from '@/components/common/layout';
+import {ScreenLayout} from '@/components/common/layout';
 
 const phoneRegExp = /^0[789]\d{9}$/;
 export const SignUpSchema = Yup.object().shape({
@@ -57,18 +58,30 @@ const formInitialValues = {
 
 export const SignupScreen: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [scrollHeight, setScrollHeight] = useState<DimensionValue>('100%');
   const style = useThemedStyles(styles);
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackScreens>>();
+
+  const isKeyboardVisible = useKeyboardStatus();
+
+  useEffect(() => {
+    if (isKeyboardVisible) {
+      setScrollHeight('130%');
+    } else {
+      setScrollHeight('100%');
+    }
+  }, [isKeyboardVisible]);
 
   const handleSignUp = async (payload: typeof formInitialValues) => {
     try {
       setIsLoading(true);
       const {email, firstName, lastName, password, phoneNumber} = payload;
+      const trimmedEmail = email.trim();
       await authInstance.signUp(
         firstName,
         lastName,
-        email,
+        trimmedEmail,
         phoneNumber,
         password,
       );
@@ -90,10 +103,12 @@ export const SignupScreen: React.FunctionComponent = () => {
 
   return (
     <ScreenLayout style={style.container}>
-      <View style={style.header}>
-        <Image style={style.image} source={AppLogo} />
-      </View>
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={{height: scrollHeight}}
+        showsVerticalScrollIndicator={false}>
+        <View style={style.header}>
+          <Image style={style.image} source={AppLogo} />
+        </View>
         <Formik
           enableReinitialize={true}
           onSubmit={handleSignUp}
@@ -214,6 +229,7 @@ const styles = ({colors, fonts}: Theme) => {
       alignItems: 'center',
     },
     container: {
+      flex: 1,
       justifyContent: 'center',
     },
     footer: {
@@ -228,6 +244,9 @@ const styles = ({colors, fonts}: Theme) => {
       lineHeight: 24,
       textDecorationLine: 'underline',
       fontFamily: fonts.ManropeBold,
+    },
+    scrollContainer: {
+      height: '100%',
     },
   });
 };

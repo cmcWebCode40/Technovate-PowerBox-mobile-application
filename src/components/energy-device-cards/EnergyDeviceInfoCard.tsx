@@ -63,7 +63,7 @@ const statues = {
   BATTERY_HEALTH: {
     icon: <BatteryCellIcon size={ICON_SIZE} />,
     color: blue[100],
-    title: 'BAttery Health',
+    title: 'Battery Health',
     borderColor: [colors.blue[100], colors.blue[300]],
   },
   DEVICE_STATE: {

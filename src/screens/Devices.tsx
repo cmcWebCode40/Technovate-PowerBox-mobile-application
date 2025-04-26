@@ -13,38 +13,56 @@ import {BatteryIcon} from '@/components/common';
 import transactionService from '@/libs/server/Transaction';
 import { showMessage } from 'react-native-flash-message';
 import { ScreenLayout } from '@/components/common/layout';
+import { useSmartInverterChannel } from '@/libs/hooks/useSmartInverterChannel';
 
 export const DevicesScreen: React.FunctionComponent = () => {
   const [paidAmount] = useState<string|undefined>(undefined);
   const style = useThemedStyles(styles);
   const {energyMetric} = useBluetoothContext();
-  const {deviceReading, switchUpsMode, connectivity} = useMqttContext();
+  const { connectivity} = useMqttContext();
   const {user} = useAuthContext();
+  const {inverterReading, toggleUpsMode} = useSmartInverterChannel();
 
   const cells: {title: string; value: string}[] = [
     {
+      title: 'Cell 1',
+      value: `${inverterReading?.cell1?.toFixed(2)} mAh`,
+    },
+    {
+      title: 'Cell 2',
+      value: `${inverterReading?.cell2?.toFixed(2)} mAh`,
+    },
+    {
+      title: 'Cell 3',
+      value: `${inverterReading?.cell2?.toFixed(2)} mAh`,
+    },
+    {
+      title: 'Cell 4',
+      value: `${inverterReading?.cell4?.toFixed(2)} mAh`,
+    },
+    {
       title: 'Battery RCC',
-      value: `${deviceReading?.battRCC?.toFixed(2)} mAh`,
+      value: `${inverterReading?.battRCC?.toFixed(2)} mAh`,
     },
     {
       title: 'Battery FCC',
-      value: `${deviceReading?.battFCC?.toFixed(2)} mAh`,
+      value: `${inverterReading?.battFCC?.toFixed(2)} mAh`,
     },
     {
       title: 'Battery Current',
-      value: `${deviceReading?.chargeCurrent?.toFixed(2)} A`,
+      value: `${inverterReading?.chargeCurrent?.toFixed(2)} A`,
     },
     {
       title: 'Battery Health',
-      value: `${deviceReading?.battHealth?.toFixed(2)}%`,
+      value: `${inverterReading?.battHealth?.toFixed(2)}%`,
     },
     {
       title: 'Battery %',
-      value: `${deviceReading?.battPercent?.toFixed(2)}%`,
+      value: `${inverterReading?.battPercent?.toFixed(2)}%`,
     },
     {
       title: 'Battery Volt',
-      value: `${deviceReading?.battVolt?.toFixed(2)} V`,
+      value: `${inverterReading?.battVolt?.toFixed(2)} V`,
     },
   ];
 
@@ -66,15 +84,15 @@ export const DevicesScreen: React.FunctionComponent = () => {
 
   return (
     <ScreenLayout style={style.container}>
-      <ScrollView style={style.content}>
+      <ScrollView style={style.content} showsVerticalScrollIndicator={false}>
         <DevicePlanOverviewCard paidAmount={paidAmount} />
         <View style={style.details}>
           <EnergyDeviceCard
             socketNo={user?.powerBoxId}
             power={String(energyMetric.usage)}
-            upsFlag={deviceReading.upsFlag}
-            balance={deviceReading.balUnit}
-            voltage={deviceReading.battVolt}
+            upsFlag={inverterReading.upsFlag}
+            balance={inverterReading.balUnit}
+            voltage={inverterReading.battVolt}
             upsFlagHandler={()=>{
               if (connectivity.deviceStatus === 'offline') {
                 showMessage({
@@ -84,7 +102,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
                 });
                 return;
               }
-              switchUpsMode(deviceReading.upsFlag);
+              toggleUpsMode(inverterReading.upsFlag);
             }}
           />
           <View style={style.infoContainer}>
@@ -122,6 +140,7 @@ const styles = (theme: Theme) => {
     },
     content: {
       marginTop: pixelSizeVertical(16),
+      marginBottom:'15%',
     },
     deviceItem: {
       marginBottom: pixelSizeVertical(40),

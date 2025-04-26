@@ -5,43 +5,19 @@ import {Theme} from '@/libs/config/theme';
 import {BluetoothAudioIcon, Typography} from '../common';
 import {fontPixel, pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {colors} from '@/libs/constants';
-import {DeviceSwitch} from './DeviceSwitch';
-import {showMessage} from 'react-native-flash-message';
 
 interface OfflineOverviewProps {
-  upsFlag: boolean;
   socketNo?: string;
-  balance: number;
   isConnected?: boolean;
-  state: string;
-  isToggling: boolean;
-  toggleControl: () => void;
-  upsFlagHandler: (state: boolean) => void;
 }
 
 export const OfflineOverview: React.FunctionComponent<OfflineOverviewProps> = ({
-  state,
-  balance,
   socketNo,
-  isToggling,
-  toggleControl,
   isConnected = false,
 }) => {
   const {green} = colors;
 
   const mainStyle = useThemedStyles(styles);
-
-  const handleToggle = () => {
-    if (!isConnected) {
-      showMessage({
-        message:
-          'Bluetooth connection required. Please connect to your inverter to continue in offline mode.',
-        type: 'warning',
-      });
-      return;
-    }
-    toggleControl();
-  };
 
   return (
     <TouchableOpacity activeOpacity={0.8} style={mainStyle.container}>
@@ -51,31 +27,15 @@ export const OfflineOverview: React.FunctionComponent<OfflineOverviewProps> = ({
             color={isConnected ? colors.green[500] : colors.red[200]}
           />
           <View>
-            <Typography style={mainStyle.headerTitle}>Overview</Typography>
+            <Typography style={mainStyle.headerTitle}>
+              {isConnected ? 'Connected' : 'Disconnected'}
+            </Typography>
           </View>
         </View>
         <View style={[mainStyle.status, {backgroundColor: green[700]}]}>
           <Typography style={[mainStyle.statusText, {color: green[600]}]}>
             {socketNo}
           </Typography>
-        </View>
-      </View>
-      <View style={mainStyle.footer}>
-        <Typography style={mainStyle.caption}>
-          {balance.toFixed(2)} Unit
-        </Typography>
-        <View style={mainStyle.ups}>
-          <DeviceSwitch
-            isLoading={isToggling}
-            onSwitch={handleToggle}
-            color={
-              !isConnected
-                ? colors.gray[200]
-                : state === 'off'
-                ? colors.green[500]
-                : colors.red[200]
-            }
-          />
         </View>
       </View>
     </TouchableOpacity>
@@ -87,6 +47,7 @@ const styles = (theme: Theme) => {
     btnContainer: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       paddingHorizontal: pixelSizeHorizontal(16),
       marginTop: pixelSizeVertical(8),
     },
@@ -114,9 +75,10 @@ const styles = (theme: Theme) => {
       marginBottom: pixelSizeVertical(24),
     },
     headerTitle: {
-      fontSize: fontPixel(24),
+      fontSize: fontPixel(16),
       textTransform: 'capitalize',
       marginLeft: 4,
+      marginTop: -10,
       fontFamily: theme.fonts.ManropeBold,
     },
     status: {
@@ -133,6 +95,8 @@ const styles = (theme: Theme) => {
     },
     subHeader: {
       flexDirection: 'row',
+      marginTop: 10,
+      alignItems: 'center',
     },
     caption: {
       color: theme.colors.blue[200],
@@ -141,7 +105,7 @@ const styles = (theme: Theme) => {
       fontFamily: theme.fonts.ManropeSemibold,
     },
     cardHeader: {
-      alignItems: 'flex-start',
+      alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: pixelSizeVertical(24),
@@ -168,18 +132,6 @@ const styles = (theme: Theme) => {
       alignItems: 'center',
       paddingHorizontal: pixelSizeVertical(12),
       marginTop: 20,
-    },
-    reading: {
-      fontFamily: theme.fonts.ManropeBold,
-      color: theme.colors.blue[200],
-    },
-    switch: {
-      marginTop: pixelSizeVertical(8),
-    },
-    ups: {
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexDirection: 'row',
     },
   });
 };

@@ -216,12 +216,11 @@ export const BluetoothContextProvider: React.FunctionComponent<
   };
 
   const handleDiscoverPeripheral = (peripheral: Peripheral) => {
-    const wordToMatch = 'Smart Socket BLE';
     const regex = /\bpb_\d{13}\b/i;
     const localName = peripheral.advertising?.localName;
     if (localName && regex.test(localName)) {
       console.info(
-        `Found match for "${wordToMatch}" in localName`,
+        `Found match for "${regex}" in localName`,
         peripheral.advertising.serviceUUIDs,
       );
       setPeripherals(map => {
@@ -234,36 +233,27 @@ export const BluetoothContextProvider: React.FunctionComponent<
     setIsScanning(false);
   };
 
-  const handleGetConnectedPeripherals = async(connectedPeripherals: Peripheral[])=>{
-  const bleState =  await BleManager.checkState();
-  if (bleState !== 'on') {
-    const discoveredDevice = Array.from(connectedPeripherals.values())[0];
-    if (Array.from(peripherals.values()).length < 1 && discoveredDevice) {
-      connectPeripheral({
-        advertising: discoveredDevice?.advertising,
-        id: discoveredDevice?.id,
-        rssi: discoveredDevice?.rssi,
-      });
-      setPeripherals(map => {
-        return new Map(map.set(discoveredDevice.id, discoveredDevice));
-      });
+  const handleGetConnectedPeripherals = async (
+    connectedPeripherals: Peripheral[],
+  ) => {
+    const bleState = await BleManager.checkState();
+    if (bleState !== 'on') {
+      const discoveredDevice = Array.from(connectedPeripherals.values())[0];
+      if (Array.from(peripherals.values()).length < 1 && discoveredDevice) {
+        connectPeripheral({
+          advertising: discoveredDevice?.advertising,
+          id: discoveredDevice?.id,
+          rssi: discoveredDevice?.rssi,
+        });
+        setPeripherals(map => {
+          return new Map(map.set(discoveredDevice.id, discoveredDevice));
+        });
+      }
     }
-  }
   };
 
   useEffect(() => {
     handleAndroidPermissions();
-    BleManager.checkState().then(state => {
-      if (state !== 'on') {
-        BleManager.enableBluetooth().then(() => {
-          showMessage({
-            message: 'Bluetooth Enabled ',
-            type: 'success',
-          });
-        });
-      }
-    });
-
     BleManager.start({showAlert: false}).then(() => {
       console.info('BleManager initialized');
     });
@@ -277,9 +267,16 @@ export const BluetoothContextProvider: React.FunctionComponent<
     let listenedForUpdates = BleManager.onDidUpdateValueForCharacteristic(
       handleUpdateValueForCharacteristic,
     );
-    let listenedForDisconnection = BleManager.onDisconnectPeripheral(handleDisconnections);
-    BleManager.getConnectedPeripherals([]).then(handleGetConnectedPeripherals);
+    let listenedForDisconnection =
+      BleManager.onDisconnectPeripheral(handleDisconnections);
 
+    BleManager.checkState().then(state => {
+      if (state === 'on') {
+        BleManager.getConnectedPeripherals([]).then(
+          handleGetConnectedPeripherals,
+        );
+      }
+    });
 
     return () => {
       listenedForUpdates.remove();
@@ -297,45 +294,45 @@ export const BluetoothContextProvider: React.FunctionComponent<
     setLoadingState(defaultLoadingState);
   };
 
-  const scanAvailableDevices = () => {
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-    ).then(async () => {
-      setPeripherals(new Map());
-      const state = await BleManager.checkState();
-
-      if (state === 'off') {
-        if (Platform.OS === 'ios') {
-          Alert.alert(
-            'Enable Bluetooth',
-            'Please enable Bluetooth in Settings to continue.',
-            [
-              {text: 'Cancel', style: 'cancel'},
-              {
-                text: 'Open Settings',
-                onPress: () => {
-                  Linking.openURL('App-Prefs:Bluetooth');
-                },
+  const scanAvailableDevices = async () => {
+    if (Platform.OS === 'android') {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+      );
+    }
+    setPeripherals(new Map());
+    const state = await BleManager.checkState();
+    if (state === 'off') {
+      if (Platform.OS === 'ios') {
+        Alert.alert(
+          'Enable Bluetooth',
+          'Please enable Bluetooth in Settings to continue.',
+          [
+            {text: 'Cancel', style: 'cancel'},
+            {
+              text: 'Open Settings',
+              onPress: () => {
+                Linking.openURL('App-Prefs:Bluetooth');
               },
-            ],
-          );
-        } else {
-          await BleManager.enableBluetooth();
-        }
+            },
+          ],
+        );
+      } else {
+        await BleManager.enableBluetooth();
       }
-      if (!isScanning) {
-        BleManager.scan([], 3)
-          .then(() => {
-            setIsScanning(true);
-          })
-          .catch(error => {
-            showMessage({
-              message: error?.toString(),
-              type: 'danger',
-            });
+    }
+    if (!isScanning) {
+      BleManager.scan([], 3)
+        .then(() => {
+          setIsScanning(true);
+        })
+        .catch(error => {
+          showMessage({
+            message: error?.toString(),
+            type: 'danger',
           });
-      }
-    });
+        });
+    }
   };
 
   const connectPeripheral = async (peripheral: Peripheral) => {
@@ -353,13 +350,12 @@ export const BluetoothContextProvider: React.FunctionComponent<
             receive: RECEIVE_CHARACTERISTIC_UUID,
             meterInfoReading: METER_READING_CHARACTERISTIC_UUID,
           };
-          await BleManager.requestMTU(response.peripheralId, 247);
-          await BleManager.startNotification(
-            response.peripheralId,
-            response.serviceId,
-            response.meterInfoReading,
-          );
-          // await sleep(900);
+          // await BleManager.requestMTU(response.peripheralId, 255);
+          // await BleManager.startNotification(
+          //   response.peripheralId,
+          //   response.serviceId,
+          //   response.meterInfoReading,
+          // );
           setCharacteristics(response);
           showMessage({
             message: `Connected to ${peripheral.name ?? peripheral.id} `,

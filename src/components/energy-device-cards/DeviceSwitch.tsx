@@ -35,19 +35,19 @@ export const DeviceSwitch: React.FunctionComponent<DeviceSwitchProps> = ({ color
 
   const animateStyle = {
     transform: [{ scale: scaleValue }],
-    shadowColor: colors.gray[600],
+    shadowColor: colors.black[300],
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: scaleValue.interpolate({
-      inputRange: [0.95, 1],
-      outputRange: [0.55, 0.8], // Lower opacity for a softer shadow
+      inputRange: [0.95, 1.5],
+      outputRange: [0.55, 0.9]
     }),
     shadowRadius: scaleValue.interpolate({
-      inputRange: [0.95, 1],
-      outputRange: [10, 16], // Slightly increased blur radius for effect
+      inputRange: [0.95, 1.5],
+      outputRange: [10, 16], 
     }),
     elevation: scaleValue.interpolate({
-      inputRange: [0.95, 1],
-      outputRange: [7, 16], // Higher elevation for more depth on Android
+      inputRange: [0.95, 1.5],
+      outputRange: [7, 16],
     }),
   };
 

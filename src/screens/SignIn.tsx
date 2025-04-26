@@ -1,4 +1,4 @@
-import {Alert, Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Alert, Image, ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import {Button, Typography} from '@/components/common';
 import {useThemedStyles} from '@/libs/hooks';
@@ -46,8 +46,9 @@ export const SignInScreen: React.FunctionComponent = () => {
   const handleLogin = async (payload: typeof formInitialValues) => {
     try {
       setIsLoading(true);
+      const trimmedEmail = payload.email.trim()
       const session = await authInstance.signIn(
-        payload.email,
+        trimmedEmail,
         payload.password,
       );
       const user = await authInstance.getUserProfile(session.uid);
@@ -84,6 +85,7 @@ export const SignInScreen: React.FunctionComponent = () => {
   }
   return (
     <ScreenLayout style={style.container}>
+      <ScrollView>
       <View style={style.header}>
         <Image source={AppLogo} />
       </View>
@@ -140,6 +142,8 @@ export const SignInScreen: React.FunctionComponent = () => {
           Don't have an account? Create one now.
         </Typography>
       </TouchableOpacity>
+      </ScrollView>
+     
     </ScreenLayout>
   );
 };
@@ -170,7 +174,7 @@ const styles = ({colors, fontSize, fonts}: Theme) => {
       backgroundColor: colors.blue[300],
     },
     container: {
-      justifyContent: 'center',
+      // justifyContent: 'center',
     },
     text: {
       color: colors.gray[200],

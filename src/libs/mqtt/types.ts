@@ -15,6 +15,7 @@ export interface DeviceRealTimeInfo {
   upsFlag: boolean;
   battHealth: number,
   battRCC: number,
+  frequency:number
   chargeCycles: number,
   usage: number,
   battFCC:number,

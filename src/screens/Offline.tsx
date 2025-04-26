@@ -4,13 +4,10 @@ import {Theme} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
 import {createHitSlop, pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {
-  DeviceInfoStatus,
-  EnergyDeviceInfoCard,
   OfflineOverview,
 } from '@/components/energy-device-cards';
 import {useAuthContext, useBluetoothContext} from '@/libs/context';
-import {BatteryIcon, Button, Typography} from '@/components/common';
-import {showMessage} from 'react-native-flash-message';
+import {Button, Typography} from '@/components/common';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
 import {useNavigation} from '@react-navigation/native';
@@ -18,70 +15,11 @@ import { ScreenLayout } from '@/components/common/layout';
 
 export const OfflineScreen: React.FunctionComponent = () => {
   const style = useThemedStyles(styles);
-  const {energyMetric} = useBluetoothContext();
   const {user} = useAuthContext();
-  const {characteristics, devicePowerControl, loadingState, disconnectPeripheral} =
+  const {characteristics, disconnectPeripheral} =
     useBluetoothContext();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackScreens>>();
-
-  const cells: {title: string; value: string}[] = [
-    {
-      title: 'Battery RCC',
-      value: `${energyMetric?.battRCC?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Battery FCC',
-      value: `${energyMetric?.battFCC?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Battery Current',
-      value: `${energyMetric?.chargeCurrent?.toFixed(2)} A`,
-    },
-    {
-      title: 'Battery Health',
-      value: `${energyMetric?.battHealth?.toFixed(2)} %`,
-    },
-    {
-      title: 'Battery %',
-      value: `${energyMetric?.battPercent?.toFixed(2)} %`,
-    },
-    {
-      title: 'Battery Volt',
-      value: `${energyMetric?.battVolt?.toFixed(2)} V`,
-    },
-  ];
-
-  const info: {type: DeviceInfoStatus; value: string}[] = [
-    {
-      type: 'POWER_CONSUMPTION',
-      value: `${energyMetric?.chargeCurrent?.toFixed(2)} W`,
-    },
-    {
-      type: 'FREQUENCY',
-      value: '50HZ',
-    },
-    {
-      type: 'AC_VOLTAGE',
-      value: `${energyMetric?.acVolt?.toFixed(2)} V`,
-    },
-    {
-      type: 'USAGE',
-      value: `${energyMetric?.usage?.toFixed(2)} KWh`,
-    },
-    {
-      type: 'INVERTER_STATE',
-      value: `${energyMetric?.state}`,
-    },
-    {
-      type: 'DEVICE_STATE',
-      value: `${energyMetric?.deviceState}`,
-    },
-    {
-      type: 'MODE',
-      value: `${energyMetric?.mode}`,
-    },
-  ];
 
   const connectBle = () => {
     navigation.navigate('AddDevice');
@@ -93,9 +31,6 @@ export const OfflineScreen: React.FunctionComponent = () => {
     }
   };
 
-  const loadUnit = () => {
-    navigation.navigate('OfflineTransactions');
-  };
 
   const wifiSettings = () => {
     navigation.navigate('WifiSetting');
@@ -107,28 +42,10 @@ export const OfflineScreen: React.FunctionComponent = () => {
         <Typography style={style.header}>Offline Mode</Typography>
         <View style={style.details}>
           <OfflineOverview
-          isToggling={loadingState.isToggling}
-            state={energyMetric.state}
             socketNo={user?.powerBoxId}
             isConnected={!!characteristics}
-            upsFlag={energyMetric.upsFlag}
-            balance={energyMetric.balUnit}
-            toggleControl={() => {
-              devicePowerControl(energyMetric.deviceId);
-            }}
-            upsFlagHandler={() => {
-              if (!characteristics) {
-                showMessage({
-                  position: 'bottom',
-                  message: 'Device is currently offline',
-                  type: 'warning',
-                });
-                return;
-              }
-              //   switchUpsMode(energyMetric.upsFlag);
-            }}
           />
-          {!characteristics ? (
+          {characteristics ? (
             <>
               <View style={style.wifi}>
                 <View />
@@ -137,34 +54,7 @@ export const OfflineScreen: React.FunctionComponent = () => {
                 </TouchableOpacity>
               </View>
               <View>
-                <View style={style.infoContainer}>
-                  {cells.map(item => (
-                    <View style={[style.infoCard]} key={item.title}>
-                      <EnergyDeviceInfoCard
-                        icon={<BatteryIcon />}
-                        title={item.title}
-                        value={item.value}
-                      />
-                    </View>
-                  ))}
-                </View>
-                <View style={style.infoContainer}>
-                  {info.map(item => (
-                    <View style={[style.infoCard]} key={item.type}>
-                      <EnergyDeviceInfoCard
-                        type={item.type}
-                        value={item.value}
-                      />
-                    </View>
-                  ))}
-                </View>
                 <View style={style.btnContainer}>
-                  <Button
-                    onPress={loadUnit}
-                    variant="contained"
-                    style={style.btnActions}>
-                    Load Unit.
-                  </Button>
                   <Button
                     variant="text"
                     onPress={disconnect}
@@ -226,7 +116,7 @@ const styles = (theme: Theme) => {
       marginBottom:'15%',
     },
     btnActions: {
-      width: '48%',
+      width: '100%',
       borderRadius: theme.radius.lg,
     },
     wifiText: {

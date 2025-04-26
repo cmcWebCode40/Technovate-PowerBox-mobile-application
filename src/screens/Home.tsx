@@ -20,7 +20,11 @@ import {
   EnergyDeviceInfoCard,
 } from '@/components/energy-device-cards';
 import Video from 'react-native-video';
-import {useAuthContext, useMqttContext} from '@/libs/context';
+import {
+  useAuthContext,
+  useBluetoothContext,
+  useMqttContext,
+} from '@/libs/context';
 import {
   AddIcon,
   ChargingBatteryIcon,
@@ -36,8 +40,9 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import TransactionStatusCard from '@/components/recharge-energy-form/TransactionStatusCard';
 import transactionService, {TransactionStatus} from '@/libs/server/Transaction';
 import {BackDrop} from '@/components/common/modal/BackDrop';
-import { showMessage } from 'react-native-flash-message';
-import { ScreenLayout } from '@/components/common/layout';
+import {showMessage} from 'react-native-flash-message';
+import {ScreenLayout} from '@/components/common/layout';
+import {useSmartInverterChannel} from '@/libs/hooks/useSmartInverterChannel';
 
 type TransactionStatusVerification = {
   isVerifying: boolean;
@@ -58,6 +63,7 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
       unitLoaded: false,
     });
   const {user} = useAuthContext();
+  const {characteristics} = useBluetoothContext();
   const {params} = route as unknown as {
     params: {transRef: string; amount: string};
   };
@@ -72,33 +78,29 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
     proceedToPreview,
     viewTransactionDetails,
   } = useTransactions();
-  const {
-    deviceReading,
-    deviceUnitTopUp,
-    devicePowerControl,
-    loadingState,
-    connectivity,
-  } = useMqttContext();
+  const {connectivity} = useMqttContext();
+  const {toggleDevice, rechargeDevice, loadingState, inverterReading} =
+    useSmartInverterChannel();
 
   useEffect(() => {
     if (params?.transRef) {
       verifyTransaction();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.transRef]);
 
-
-  const handlePowerToggle = ()=>{
+  const handlePowerToggle = () => {
     if (connectivity.deviceStatus === 'offline') {
       showMessage({
         message:
-          'Your inverter is offline. Connect via Bluetooth if you\'re nearby to continue.',
+          "Your inverter is offline. Connect via Bluetooth if you're nearby to continue.",
         type: 'warning',
       });
       return;
     }
-    devicePowerControl();
-
+    if (user?.powerBoxId) {
+      toggleDevice(user?.powerBoxId);
+    }
   };
   const verifyTransaction = useCallback(async () => {
     try {
@@ -113,7 +115,13 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
       );
       if (response.loadStatus === 'SUCCESSFUL') {
         const amount = Number(params.amount) / 100;
-        await deviceUnitTopUp(String(amount), params?.transRef);
+        if (user?.powerBoxId) {
+          await rechargeDevice(
+            user?.powerBoxId,
+            params?.transRef,
+            String(amount),
+          );
+        }
         setTransactionStatusDetails(state => ({...state}));
       }
       if (response?.status) {
@@ -142,35 +150,35 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
   const info: {type: DeviceInfoStatus; value: string}[] = [
     {
       type: 'AC_CURRENT',
-      value: `${deviceReading?.battPercent?.toFixed(2)}%`,
+      value: `${inverterReading?.battPercent?.toFixed(2)} %`,
     },
     {
       type: 'POWER_CONSUMPTION',
-      value: `${deviceReading?.chargeCurrent?.toFixed(2)} W`,
+      value: `${inverterReading?.chargeCurrent?.toFixed(2)} W`,
     },
     {
       type: 'FREQUENCY',
-      value: `${deviceReading?.battVolt?.toFixed(2)} KWh`,
+      value: `${inverterReading?.frequency?.toFixed(2) ?? '0'} Hz`,
     },
     {
       type: 'AC_VOLTAGE',
-      value: `${deviceReading?.acVolt?.toFixed(2)} V`,
+      value: `${inverterReading?.acVolt?.toFixed(2)} V`,
     },
     {
       type: 'USAGE',
-      value: `${deviceReading?.usage?.toFixed(2)} KWh`,
+      value: `${inverterReading?.usage?.toFixed(2)} KWh`,
     },
     {
       type: 'BATTERY_HEALTH',
-      value: `${deviceReading?.battHealth?.toFixed(2)} V`,
+      value: `${inverterReading?.battHealth?.toFixed(2)} %`,
     },
     {
       type: 'DEVICE_STATE',
-      value: `${deviceReading?.deviceState}`,
+      value: `${inverterReading?.deviceState}`,
     },
     {
       type: 'MODE',
-      value: `${deviceReading?.mode}`,
+      value: `${inverterReading?.mode}`,
     },
   ];
 
@@ -200,22 +208,22 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
             </Typography>
             <Typography variant="b2">{formatDate(new Date())}</Typography>
           </View>
-          {deviceReading?.state === 'charging' ? (
+          {inverterReading?.state === 'charging' ? (
             <ChargingBatteryIcon size={40} />
           ) : (
             <View
               style={[
                 style.status,
-                deviceReading?.state === 'on' && style.deviceStateStatus,
-                deviceReading?.state === 'off' && {
+                inverterReading?.state === 'on' && style.deviceStateStatus,
+                inverterReading?.state === 'off' && {
                   backgroundColor: colors.red[200],
                 },
               ]}>
               <Typography
                 style={[style.statusText, style.deviceStateStatusText]}>
-                {deviceReading?.state === 'on'
+                {inverterReading?.state === 'on'
                   ? 'ON'
-                  : deviceReading?.state === 'lock'
+                  : inverterReading?.state === 'lock'
                   ? 'LOCK'
                   : 'off'}
               </Typography>
@@ -223,24 +231,35 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
           )}
         </View>
         <View style={style.progressIndicatorContainer}>
-          <EnergyUsageProgressIndicator balance={deviceReading.balUnit} />
+          <EnergyUsageProgressIndicator balance={inverterReading.balUnit} />
         </View>
-        <View style={style.connectivity}>
-          <Typography variant="b1" style={[style.offlineText]}>
-            Inverter Internet Connectivity:
-          </Typography>
-          <Typography
-            variant="b1"
-            style={[
-              style.offlineText,
-              connectivity.deviceStatus === 'online'
-                ? style.deviceOnline
-                : style.deviceOffline,
-            ]}>
-            {connectivity.deviceStatus}
-          </Typography>
+        <View style={style.mode}>
+          <View style={style.connectivity}>
+            <Typography variant="b1" style={[style.offlineText]}>
+              Internet Connectivity :
+            </Typography>
+            <Typography
+              variant="b1"
+              style={[
+                style.offlineText,
+                connectivity.deviceStatus === 'online'
+                  ? style.deviceOnline
+                  : style.deviceOffline,
+              ]}>
+              {connectivity.deviceStatus}
+            </Typography>
+          </View>
+          <View style={style.connectivity}>
+            <Typography variant="b1" style={[style.offlineText]}>
+              Mode :
+            </Typography>
+            <Typography
+              variant="b1"
+              style={[style.offlineText, style.deviceOnline]}>
+              {characteristics ? 'Bluetooth' : 'Internet'}
+            </Typography>
+          </View>
         </View>
-
         <View style={style.infoContainer}>
           {info.map(item => (
             <View style={[style.infoCard]} key={item.type}>
@@ -248,31 +267,30 @@ export const HomeScreen: React.FunctionComponent<HomeScreenProps> = ({
             </View>
           ))}
         </View>
-        <View style={{marginBottom:'15%'}}>
-        <DeviceSwitch
-          onSwitch={handlePowerToggle}
-          isLoading={loadingState.isToggling}
-          color={
-            connectivity.deviceStatus === 'offline'
-              ? colors.gray[200]
-              : deviceReading.state === 'off'
-              ? colors.green[500]
-              : colors.red[200]
-          }
-        />
-        <TouchableOpacity
-          activeOpacity={0.6}
-          onPress={rechargeInverter}
-          style={style.btnContainer}>
-          <View style={style.iconContainer}>
-            <AddIcon color={colors.white[100]} />
-          </View>
-          <Typography variant="b2" style={style.textIcon}>
-            Recharge
-          </Typography>
-        </TouchableOpacity>
+        <View style={style.deviceSwitch}>
+          <DeviceSwitch
+            onSwitch={handlePowerToggle}
+            isLoading={loadingState.isToggling}
+            color={
+              connectivity.deviceStatus === 'offline'
+                ? colors.gray[200]
+                : inverterReading.state === 'off'
+                ? colors.green[500]
+                : colors.red[200]
+            }
+          />
+          <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={rechargeInverter}
+            style={style.btnContainer}>
+            <View style={style.iconContainer}>
+              <AddIcon color={colors.white[100]} />
+            </View>
+            <Typography variant="b2" style={style.textIcon}>
+              Recharge
+            </Typography>
+          </TouchableOpacity>
         </View>
-
       </ScrollView>
       <Modal
         onClose={() => {
@@ -320,7 +338,7 @@ const styles = (theme: Theme) => {
       justifyContent: 'space-between',
       paddingVertical: pixelSizeVertical(16),
       paddingLeft: pixelSizeHorizontal(10),
-      paddingRight:6,
+      paddingRight: 6,
       backgroundColor: theme.colors.black[100],
     },
     greeting: {
@@ -414,13 +432,13 @@ const styles = (theme: Theme) => {
       elevation: 4,
       borderWidth: 3,
       borderColor: theme.colors.black[400],
-      marginRight:10,
+      marginRight: 10,
     },
     textIcon: {
       fontWeight: '700',
       marginTop: 10,
-      textAlign:'center',
-      fontFamily:theme.fonts.ManropeSemibold,
+      textAlign: 'center',
+      fontFamily: theme.fonts.ManropeSemibold,
     },
     backgroundVideo: {
       position: 'absolute',
@@ -462,5 +480,11 @@ const styles = (theme: Theme) => {
       alignItems: 'center',
       marginBottom: 16,
     },
+    mode: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    deviceSwitch: {marginBottom: '15%'},
   });
 };

@@ -7,9 +7,10 @@ import {TransactionItem} from '@/components/transactions/TransactionItem';
 import {Header} from '@/components/common/header';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
-import {useMqttContext} from '@/libs/context';
+import {useAuthContext, useMqttContext} from '@/libs/context';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenLayout } from '@/components/common/layout';
+import { useSmartInverterChannel } from '@/libs/hooks/useSmartInverterChannel';
 
 type TransactionDetailScreenProps = NativeStackScreenProps<
   MainStackScreens,
@@ -20,9 +21,12 @@ export const TransactionDetailScreen: React.FunctionComponent<
   TransactionDetailScreenProps
 > = ({route: {params}}) => {
   const style = useThemedStyles(styles);
-  const {deviceUnitTopUp, loadingState, connectivity} = useMqttContext();
+  const {connectivity} = useMqttContext();
   const navigation =
   useNavigation();
+  const {rechargeDevice, loadingState} =
+    useSmartInverterChannel();
+    const {user} = useAuthContext();
 
   const shouldShowLoadUnitButton =
     connectivity.deviceStatus === 'online' &&
@@ -46,9 +50,11 @@ export const TransactionDetailScreen: React.FunctionComponent<
           loading={loadingState.isRecharging}
           disabled={loadingState.isRecharging}
           onPress={() => {
-            deviceUnitTopUp(params.amount as string, params.transRef).then(()=>{
-              navigation.goBack();
-            });
+            if (user?.powerBoxId) {
+              rechargeDevice(user?.powerBoxId, params.transRef, params.amount as string).then(()=>{
+                navigation.goBack();
+              });
+            }
           }}>
           Push Unit to Device
         </Button>
