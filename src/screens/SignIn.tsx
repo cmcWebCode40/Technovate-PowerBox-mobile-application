@@ -45,8 +45,9 @@ export const SignInScreen: React.FunctionComponent = () => {
   const handleLogin = async (payload: typeof formInitialValues) => {
     try {
       setIsLoading(true);
+      const trimmedEmail = payload.email.trim();
       const session = await authInstance.signIn(
-        payload.email,
+        trimmedEmail,
         payload.password,
       );
       const user = await authInstance.getUserProfile(session.uid);

@@ -64,10 +64,11 @@ export const SignupScreen: React.FunctionComponent = () => {
     try {
       setIsLoading(true);
       const {email, firstName, lastName, password, phoneNumber} = payload;
+      const trimmedEmail = email.trim();
       await authInstance.signUp(
         firstName,
         lastName,
-        email,
+        trimmedEmail,
         phoneNumber,
         password,
       );
