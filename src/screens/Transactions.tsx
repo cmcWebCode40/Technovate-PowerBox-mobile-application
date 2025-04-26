@@ -9,7 +9,6 @@ import {Typography} from '@/components/common';
 import transactionService, {TransactionParams} from '@/libs/server/Transaction';
 import {TransactionItem} from '@/components/transactions/TransactionItem';
 import {useAuthContext} from '@/libs/context';
-import {useIsFocused} from '@react-navigation/native';
 
 export const TransactionScreen: React.FunctionComponent = () => {
   const [transactions, setTransactions] = useState<
@@ -18,27 +17,31 @@ export const TransactionScreen: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const style = useThemedStyles(styles);
   const {user} = useAuthContext();
-  const isFocused = useIsFocused();
 
   useEffect(() => {
+    getTransactions();
+  }, []);
+
+  const getTransactions = async ()=>{
     if (!user?.userId) {
       return;
     }
-    (async () => {
-      try {
-        setIsLoading(true);
-        const response = await transactionService.getAllTransactions(
-          user.userId,
-          'server',
-        );
-        setTransactions(response);
-      } catch (error) {
-        Alert.alert('Error fetching data');
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [user?.userId, isFocused]);
+    try {
+      setIsLoading(true);
+      const response = await transactionService.getAllTransactions(
+        user.userId,
+        'cache',
+      );
+      const sortedByDateDesc = response.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setTransactions(sortedByDateDesc);
+    } catch (error) {
+      Alert.alert('Error fetching data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <View style={style.container}>
@@ -49,6 +52,8 @@ export const TransactionScreen: React.FunctionComponent = () => {
         <View style={style.content}>
           <FlatList
             data={transactions}
+            refreshing={isLoading}
+            onRefresh={getTransactions}
             keyExtractor={item => item.reference}
             renderItem={({item}) => (
               <TransactionItem
@@ -85,6 +90,7 @@ const styles = ({colors}: Theme) => {
     },
     content: {
       paddingVertical: pixelSizeVertical(16),
+      height:'92%',
     },
     emptyText: {
       textAlign: 'center',
