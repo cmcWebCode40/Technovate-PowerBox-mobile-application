@@ -63,7 +63,7 @@ const statues = {
   BATTERY_HEALTH: {
     icon: <BatteryCellIcon size={ICON_SIZE} />,
     color: blue[100],
-    title: 'BAttery Health',
+    title: 'Battery Health',
     borderColor: [colors.blue[100], colors.blue[300]],
   },
   DEVICE_STATE: {
@@ -131,8 +131,8 @@ const styles = (theme: Theme) => {
       fontWeight: '600',
       fontFamily: theme.fonts.ManropeBold,
       color: theme.colors.white[100],
-      fontSize: 10,
-      marginBottom: pixelSizeVertical(8),
+      fontSize: 14,
+      marginBottom: pixelSizeVertical(10),
     },
     info: {
       fontSize: fontPixel(12),

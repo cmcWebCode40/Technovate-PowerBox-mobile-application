@@ -23,15 +23,15 @@ export const DevicesScreen: React.FunctionComponent = () => {
   const cells: {title: string; value: string}[] = [
     {
       title: 'Battery RCC',
-      value: `${deviceReading?.battRCC?.toFixed(2)} mAh`,
+      value: `${deviceReading?.battRCC?.toFixed(2)}Ah`,
     },
     {
       title: 'Battery FCC',
-      value: `${deviceReading?.battFCC?.toFixed(2)} mAh`,
+      value: `${deviceReading?.battFCC?.toFixed(2)}Ah`,
     },
     {
       title: 'Battery Current',
-      value: `${deviceReading?.chargeCurrent?.toFixed(2)} A`,
+      value: `${deviceReading?.chargeCurrent?.toFixed(2)}A`,
     },
     {
       title: 'Battery Health',
@@ -65,7 +65,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
 
   return (
     <View style={style.container}>
-      <ScrollView style={style.content}>
+      <ScrollView style={style.content} showsVerticalScrollIndicator={false}>
         <DevicePlanOverviewCard paidAmount={paidAmount} />
         <View style={style.details}>
           <EnergyDeviceCard
@@ -131,7 +131,7 @@ const styles = (theme: Theme) => {
       marginHorizontal:'auto',
     },
     infoCard: {
-      width: '33%',
+      width: '48%',
       flexGrow:1,
     },
   });
