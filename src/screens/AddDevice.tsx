@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@/components/common';
 import {fontPixel, pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
-import PrintedCircuitBoardImage from '../../assets/images/inverter-removebg-preview.png';
+import PrintedCircuitBoardImage from '../../assets/images/inverter.png';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {AuthStackScreens} from '@/navigation/type';
@@ -65,7 +65,7 @@ export const AddDeviceScreen: React.FunctionComponent = () => {
       </Typography>
       <Typography style={style.scanSubText}>(Click to connect)</Typography>
       <Image source={PrintedCircuitBoardImage} style={style.image} />
-      <Typography variant='b2' style={style.bleText}>
+      <Typography variant="b2" style={style.bleText}>
         {isPairing ? 'Pairing...' : discoveredDevice.name}
       </Typography>
     </View>
@@ -164,7 +164,7 @@ const styles = (theme: Theme) => {
       marginTop: '0%',
       marginBottom: '10%',
       fontWeight:'600',
-      fontFamily:theme.fonts.ManropeSemibold
+      fontFamily:theme.fonts.ManropeSemibold,
     },
     scanText: {
       marginTop: '10%',
