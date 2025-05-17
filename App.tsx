@@ -15,10 +15,10 @@ function App(): React.JSX.Element {
         <NavigationContainer>
           <AuthProvider>
             <MqttProvider>
-              <BluetoothContextProvider>
+              <>
               <StatusBar barStyle={'default'} />
               <RootNavigator />
-              </BluetoothContextProvider>
+              </>
             </MqttProvider>
           </AuthProvider>
         </NavigationContainer>
