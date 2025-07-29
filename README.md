@@ -16,8 +16,6 @@
 
 
 
-
-
 ## About PowerBox
 
 **PowerBox** is a revolutionary portable, solar-powered device with an inbuilt battery that provides reliable electricity to the 85+ million Nigerians living in areas with unstable power or no grid access. 
