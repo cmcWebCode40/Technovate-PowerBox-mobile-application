@@ -12,7 +12,7 @@ class MqttModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     private var isConnecting = false
 
     init {
-        val brokerUrl = "tcp://41.223.145.80:1883"
+        val brokerUrl = "tcp://obiot.duckdns.org:1884"
         mqttClient = MqttClient(brokerUrl, MqttClient.generateClientId(), MemoryPersistence())
 
         // Set MQTT callback for connection and disconnection events

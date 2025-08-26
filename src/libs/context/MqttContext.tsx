@@ -94,8 +94,8 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
 
   useEffect(() => {
     let timeOutHandler: NodeJS.Timeout;
-    const username = 'admin';
-    const password = '12345678';
+    const username = 'PowerBox';
+    const password = 'ObiotPowerBox#01';
 
     if (!isAuthenticated) {
       return;
@@ -123,18 +123,18 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
           data.message?.toString(),
         ) as DeviceRealTimeInfo;
         setDeviceReading(parsedMessage);
-        // console.log(
-        //   `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        // );
+        console.log(
+          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+        );
       }
       if (data.topic === STATUS_TOPIC) {
         const parsedConnectivity = JSON.parse(
           data.message?.toString(),
         ) as DeviceStatus;
         setConnectivity(parsedConnectivity);
-        // console.log(
-        //   `Message received: ${data.message} on topic ${data.topic} MQTTX`,
-        // );
+        console.log(
+          `Message received: ${data.message} on topic ${data.topic} MQTTX`,
+        );
       }
       if (data.topic === RESPONSE_TOPIC) {
         const parsedResponse = JSON.parse(
@@ -208,11 +208,11 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
       });
       return;
     }
-    const command = deviceReading.state === 'off' ? 'on' : 'off';
+    const command = deviceReading.state === 'on' ? 'off' : 'on';
     try {
       const payload = JSON.stringify({
         id: user?.powerBoxId,
-        command,
+        command: command,
       });
       setLoadingState(state => ({...state, isToggling: true}));
       if (user?.powerBoxId) {
