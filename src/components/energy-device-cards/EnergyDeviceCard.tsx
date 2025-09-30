@@ -10,7 +10,7 @@ import LineImage from '../../../assets/images/line.png';
 interface EnergyDeviceCardProps {
   upsFlag:boolean;
   voltage?: number;
-  power: string;
+  power: number;
   socketNo?: string;
   balance:number
   upsFlagHandler:(state:boolean)=>void
@@ -102,7 +102,7 @@ const styles = (theme: Theme) => {
       marginBottom: pixelSizeVertical(24),
     },
     headerTitle: {
-      fontSize: fontPixel(24),
+      fontSize: fontPixel(16),
       textTransform: 'capitalize',
       fontFamily: theme.fonts.ManropeBold,
     },
@@ -139,7 +139,7 @@ const styles = (theme: Theme) => {
       flexBasis: '60%',
     },
     title: {
-      fontSize: fontPixel(20),
+      fontSize: fontPixel(14),
       marginVertical: pixelSizeVertical(8),
       color: theme.colors.blue[200],
       marginRight:pixelSizeHorizontal(10)
@@ -155,6 +155,7 @@ const styles = (theme: Theme) => {
       paddingHorizontal: pixelSizeVertical(12),
     },
     reading: {
+      fontSize: fontPixel(14),
       fontFamily: theme.fonts.ManropeBold,
       color: theme.colors.blue[200],
     },

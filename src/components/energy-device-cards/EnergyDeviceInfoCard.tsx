@@ -1,5 +1,13 @@
 import {StyleSheet, View} from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+  withSpring,
+  Easing,
+} from 'react-native-reanimated';
 import {
   AcVoltIcon,
   BatteryCellIcon,
@@ -14,6 +22,7 @@ import {colors} from '@/libs/constants';
 import {useThemedStyles} from '@/libs/hooks';
 import {Theme} from '@/libs/config/theme';
 import {fontPixel, pixelSizeVertical} from '@/libs/utils';
+
 const {orange, blue, green} = colors;
 
 export type DeviceInfoStatus =
@@ -85,20 +94,60 @@ const statues = {
     borderColor: [colors.blue[100], colors.blue[300]],
   },
 };
+
 interface EnergyDeviceInfoCardProps {
   type?: DeviceInfoStatus;
   value: string;
   title?: string;
   icon?: React.ReactNode;
+  animationDelay?: number;
 }
 
 export const EnergyDeviceInfoCard: React.FunctionComponent<
   EnergyDeviceInfoCardProps
-> = ({type = 'AC_CURRENT', value, title, icon}) => {
+> = ({type = 'AC_CURRENT', value, title, icon, animationDelay = 0}) => {
   const style = useThemedStyles(styles);
 
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(50);
+  const scale = useSharedValue(0.5);
+
+  useEffect(() => {
+    // Trigger animations with delay
+    opacity.value = withDelay(
+      animationDelay,
+      withTiming(1, {
+        duration: 700,
+        easing: Easing.out(Easing.linear),
+      }),
+    );
+
+    translateY.value = withDelay(
+      animationDelay,
+      withSpring(0, {
+        damping: 5,
+        stiffness: 15,
+        mass: 2,
+      }),
+    );
+
+    scale.value = withDelay(
+      animationDelay,
+      withSpring(1, {
+        damping: 5,
+        stiffness: 15,
+        mass: 2,
+      }),
+    );
+  }, [animationDelay, opacity, translateY, scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{translateY: translateY.value}, {scale: scale.value}],
+  }));
+
   return (
-    <View style={style.container}>
+    <Animated.View style={[style.container, animatedStyle]}>
       {icon ?? statues[type].icon}
       <View style={style.content}>
         <Typography variant="b2" style={style.title}>
@@ -106,7 +155,7 @@ export const EnergyDeviceInfoCard: React.FunctionComponent<
         </Typography>
         <Typography style={style.info}>{value}</Typography>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
