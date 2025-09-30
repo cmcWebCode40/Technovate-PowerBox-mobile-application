@@ -11,4 +11,12 @@ export const Config = {
     storageBucket: 'technovatepowerbox.firebasestorage.app',
     apiKey: 'AIzaSyDKqZxmC2IU_uzvHHJyGhhKGokA3DtCasg',
   },
+  mqtt: {
+    host: 'obiot.duckdns.org',
+    port: 8084,
+    protocol: 'wss',
+    path: '/mqtt',
+    username:'PowerBox',
+    password: 'ObiotPowerBox#01',
+  }
 };
