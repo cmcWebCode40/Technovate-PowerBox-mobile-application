@@ -5,7 +5,6 @@ import {
 } from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import {MainStackScreens} from '@/navigation/type';
-import {Config} from '@/libs/config/keys';
 import {StyleSheet} from 'react-native';
 import { IswPaymentWebView } from 'react-native-interswitch-pay';
 import { ScreenLayout } from '@/components/common/layout';
@@ -37,10 +36,13 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
   } = params;
   const IswWebViewRef = React.useRef<TIswPaymentWebView>(null);
 
+  console.log(transactionRef,'TRANSACTION REFERENCE');
+
   const navigator = useCallback(
     (navParams?: {transRef: string; amount: number}) => {
+      console.log('Navigating to Dashboard with params:', navParams);
       navigation.navigate<any>('Dashboard', {
-        screen: 'Home',
+        screen: 'Dashboard',
         params: navParams,
       });
     },
@@ -73,8 +75,7 @@ export const PaymentScreen: React.FunctionComponent<PaymentScreenProps> = ({
           payItem={{id: payItemId}}
           merchantCode={merchantCode}
           onCompleted={handleCallback}
-          transactionReference={transactionRef}
-          checkoutUrl={Config.ISW_WEB_CHECKOUT_URL}
+          trnxRef={transactionRef}
         />
       ) : null}
     </ScreenLayout>
