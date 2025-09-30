@@ -11,6 +11,8 @@ import {BackDrop} from '@/components/common/modal/BackDrop';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackScreens } from '@/navigation/type';
+import { ScreenLayout } from '@/components/common/layout';
+import VideoBackground from '@/components/common/layout/VideoBackground';
 
 export const AccountScreen: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -101,6 +103,7 @@ export const AccountScreen: React.FunctionComponent = () => {
   };
   return (
     <>
+    <VideoBackground />
       <BackDrop isLoading={isLoading} />
       <View style={style.container}>
         <View style={style.profileHeader}>
@@ -141,7 +144,6 @@ const styles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.black[100],
     },
     list: {
       marginTop: pixelSizeVertical(40),
@@ -171,6 +173,8 @@ const styles = (theme: Theme) => {
     line: {},
     profileHeader: {
       backgroundColor: theme.colors.black[200],
+      borderBottomRightRadius: 48,
+      borderBottomLeftRadius: 48,
       borderTopLeftRadius: 0,
       borderTopRightRadius: 0,
       paddingBottom: '8%',
