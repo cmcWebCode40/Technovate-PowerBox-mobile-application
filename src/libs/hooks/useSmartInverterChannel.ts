@@ -20,12 +20,8 @@ export const useSmartInverterChannel = () => {
   } = useMqttContext();
 
   const isBluetoothConnected = !!characteristics;
-energyMetric;
+  energyMetric;
   const inverterReading = isBluetoothConnected ? energyMetric : deviceReading;
-
-  console.log('==================inverterReading==================');
-  console.log(inverterReading);
-  console.log('====================================');
 
   const loadingState = {
     isRecharging: bleLoadingState.isRecharging || mqttLoadingState.isRecharging,
@@ -47,7 +43,6 @@ energyMetric;
       bleDevicePowerControl(deviceId);
       return;
     }
-
     if (!isDeviceOnline()) {
       notifyOffline();
       return;
@@ -56,7 +51,7 @@ energyMetric;
     mqttDevicePowerControl();
   };
 
-  const rechargeDevice = async(
+  const rechargeDevice = async (
     deviceId: string,
     reference: string,
     amount: string,
@@ -71,7 +66,7 @@ energyMetric;
       return;
     }
 
-   await deviceUnitTopUp(amount, reference);
+    await deviceUnitTopUp(amount, reference);
   };
 
   const toggleUpsMode = (mode: boolean) => {
