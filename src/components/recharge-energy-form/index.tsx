@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {Button, Typography} from '../common';
 import {Theme} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
-import {pixelSizeVertical} from '@/libs/utils';
+import {formatAmount, pixelSizeVertical} from '@/libs/utils';
 
 interface RechargeEnergyFormProps {
   isLoading:boolean
@@ -14,7 +14,7 @@ export const RechargeEnergyForm: React.FunctionComponent<
   RechargeEnergyFormProps
 > = ({rechargeMeter, isLoading}) => {
   const style = useThemedStyles(styles);
-  const [unit, setUnit] = useState<string | undefined>('1');
+  const [unit, setUnit] = useState<string | undefined>('100');
   const [amount, setAmount] = useState(100);
   const [calcAmount, setCalcAmount] = useState<string|undefined>(undefined);
 
@@ -27,7 +27,7 @@ export const RechargeEnergyForm: React.FunctionComponent<
   };
 
   const handleChange = (text: string) => {
-    const eqUint = parseInt(text, 10) / 100;
+    const eqUint = parseInt(text, 10) / 1;
     setCalcAmount(text);
     if (parseInt(text, 10)) {
       setAmount(parseInt(text, 10));
@@ -37,7 +37,7 @@ export const RechargeEnergyForm: React.FunctionComponent<
     if (eqUint) {
       setUnit(String(eqUint));
     }else{
-      setUnit('1');
+      setUnit('100');
     }
   };
   return (
@@ -48,12 +48,13 @@ export const RechargeEnergyForm: React.FunctionComponent<
         placeholder="Enter Aunt"
         editable={!isLoading}
         value={calcAmount}
+        maxLength={7}
         onChangeText={handleChange}
         placeholderTextColor={'#9095A1'}
       />
       <View style={style.conversionLayout}>
-      <Typography> ₦{amount} </Typography>
-        <Typography>= {Number(unit)?.toFixed(1)}</Typography>
+      <Typography> ₦{formatAmount(amount)} </Typography>
+        <Typography>= {formatAmount(unit)}</Typography>
       </View>
       <Button variant="contained" disabled={!unit || isLoading} loading={isLoading} onPress={submit}>
         Proceed
@@ -67,7 +68,7 @@ const styles = (theme: Theme) => {
     input: {
       borderWidth: 1,
       borderRadius: theme.radius.lg,
-      padding: pixelSizeVertical(10),
+      padding: pixelSizeVertical(14),
       backgroundColor: theme.colors.white[100],
       borderColor: theme.colors.gray[300],
       marginBottom: pixelSizeVertical(24),

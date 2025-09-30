@@ -64,7 +64,7 @@ const updateIconColor = (focused: boolean) => {
 
 const tabs = [
   {
-    name: 'Home',
+    name: 'Dashboard',
     component: HomeScreen,
     icon: ({focused}: TabBarLabelProps) => (
       <HomeIcon color={updateIconColor(focused)} />
@@ -85,14 +85,14 @@ const tabs = [
     ),
   },
   {
-    name: 'Offline Mode',
+    name: 'Bluetooth',
     component: OfflineScreen,
     icon: ({focused}: TabBarLabelProps) => (
       <BluetoothAudioIcon size={'32'} color={updateIconColor(focused)} />
     ),
   },
   {
-    name: 'Account',
+    name: 'Profile',
     component: AccountScreen,
     icon: ({focused}: TabBarLabelProps) => (
       <AccountIcon color={updateIconColor(focused)} />

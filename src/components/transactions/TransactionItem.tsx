@@ -60,7 +60,10 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   };
 
   return (
-    <TouchableOpacity onPress={viewDetails} style={style.container}>
+    <TouchableOpacity
+      activeOpacity={0.6}
+      onPress={viewDetails} style={style.container}
+    >
       <View style={style.row}>
         <Typography style={style.label}>Date:</Typography>
         <Typography style={style.value}>{date}</Typography>
