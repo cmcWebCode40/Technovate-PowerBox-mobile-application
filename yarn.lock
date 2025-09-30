@@ -2463,6 +2463,11 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"
   integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
 
+"@types/spark-md5@^3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@types/spark-md5/-/spark-md5-3.0.5.tgz#eddec8639217e518c26e9e221ff56bf5f5f5c900"
+  integrity sha512-lWf05dnD42DLVKQJZrDHtWFidcLrHuip01CtnC2/S6AMhX4t9ZlEUj4iuRlAnts0PQk7KESOqKxeGE/b6sIPGg==
+
 "@types/stack-utils@^2.0.0":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.3.tgz#6209321eb2c1712a7e7466422b8cb1fc0d9dd5d8"
@@ -5622,6 +5627,11 @@ loose-envify@^1.0.0, loose-envify@^1.4.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
+lottie-react-native@^7.3.4:
+  version "7.3.4"
+  resolved "https://registry.yarnpkg.com/lottie-react-native/-/lottie-react-native-7.3.4.tgz#774bc028e2b93dd88cd87ab84ac51a1c3e015cad"
+  integrity sha512-XUh7eGFb7ID8JRdU6U4N4cYQeYmjtdQRvd8ZXJ6xrdSsn5gZD0c79ITOREPcwJg4YupBFHgyV1GXdAHQP+KYUQ==
+
 lru-cache@^10.2.0, lru-cache@^10.4.3:
   version "10.4.3"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
@@ -6577,6 +6587,11 @@ react-is@^19.0.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-19.0.0.tgz#d6669fd389ff022a9684f708cf6fa4962d1fea7a"
   integrity sha512-H91OHcwjZsbq3ClIDHMzBShc1rotbfACdWENsmEf0IFvZ3FgGPtdHMcsv45bQ1hAbgdfiA8SnxTKfDS+x/8m2g==
 
+react-native-actions-sheet@^0.9.7:
+  version "0.9.7"
+  resolved "https://registry.yarnpkg.com/react-native-actions-sheet/-/react-native-actions-sheet-0.9.7.tgz#43ff2d9252f7af2da6dc051be5a5c375a844cdfb"
+  integrity sha512-rjUwxUr5dxbdSLDtLDUFAdSlFxpNSpJsbXLhHkBzEBMxEMPUhRT3zqbvKqsPj0JUkjwuRligxrhbIJZkg/6ZDw==
+
 react-native-android-open-settings@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-native-android-open-settings/-/react-native-android-open-settings-1.3.0.tgz#c6257f3c88ada62945fffe887933a2a828adf45d"
@@ -6602,19 +6617,19 @@ react-native-flash-message@^0.4.2:
     prop-types "^15.8.1"
     react-native-iphone-screen-helper "^2.0.2"
 
-react-native-gesture-handler@^2.19.0:
-  version "2.24.0"
-  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.24.0.tgz#b6e1f13ec9bf8dfa5f4911854b6e0d73d882a81a"
-  integrity sha512-ZdWyOd1C8axKJHIfYxjJKCcxjWEpUtUWgTOVY2wynbiveSQDm8X/PDyAKXSer/GOtIpjudUbACOndZXCN3vHsw==
+react-native-gesture-handler@^2.28.0:
+  version "2.28.0"
+  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.28.0.tgz#07fb4f5eae72f810aac3019b060d26c1835bfd0c"
+  integrity sha512-0msfJ1vRxXKVgTgvL+1ZOoYw3/0z1R+Ked0+udoJhyplC2jbVKIJ8Z1bzWdpQRCV3QcQ87Op0zJVE5DhKK2A0A==
   dependencies:
     "@egjs/hammerjs" "^2.0.17"
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
 
-react-native-interswitch-pay@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-interswitch-pay/-/react-native-interswitch-pay-0.2.0.tgz#2ff39b2264e7338223b78098d5392c4b8312de01"
-  integrity sha512-Ac2VAjb42jDxxphtNK7sGIYk4EMuCMRkolDIkXFOGTPfNTWLabobN0Bp2LuJywAfgoBnm8HXILjzUPMyk2CNww==
+react-native-interswitch-pay@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-interswitch-pay/-/react-native-interswitch-pay-0.6.1.tgz#aab781f98f919a1c389591db0f68c9e549efdbb6"
+  integrity sha512-PrDARJMtnD16PAI3cSfDkLbjwrAUOxk0ng27zVfcb3nijivzEAS+FVh511094jPLGLeRWTUGikQb2zssDN4Ncg==
 
 react-native-iphone-screen-helper@^2.0.2:
   version "2.1.2"
@@ -7227,6 +7242,11 @@ source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
+
+spark-md5@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/spark-md5/-/spark-md5-3.0.2.tgz#7952c4a30784347abcee73268e473b9c0167e3fc"
+  integrity sha512-wcFzz9cDfbuqe0FZzfi2or1sgyIrsDwmPwfZC4hiNidPdPINjeUwNfv5kldczoEAcjl9Y1L3SM7Uz2PUEQzxQw==
 
 split-on-first@^1.0.0:
   version "1.1.0"

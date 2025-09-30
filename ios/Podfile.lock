@@ -1321,6 +1321,29 @@ PODS:
     - hermes-engine/Pre-built (= 0.78.0)
   - hermes-engine/Pre-built (0.78.0)
   - leveldb-library (1.22.6)
+  - lottie-ios (4.5.0)
+  - lottie-react-native (7.3.4):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - lottie-ios (= 4.5.0)
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
@@ -3049,7 +3072,7 @@ PODS:
     - Firebase/Firestore (= 11.8.0)
     - React-Core
     - RNFBApp
-  - RNGestureHandler (2.24.0):
+  - RNGestureHandler (2.28.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3297,6 +3320,7 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - lottie-react-native (from `../node_modules/lottie-react-native`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -3392,6 +3416,7 @@ SPEC REPOS:
     - gRPC-Core
     - GTMSessionFetcher
     - leveldb-library
+    - lottie-ios
     - nanopb
     - RecaptchaInterop
     - SocketRocket
@@ -3412,6 +3437,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-01-13-RNv0.78.0-a942ef374897d85da38e9c8904574f8376555388
+  lottie-react-native:
+    :path: "../node_modules/lottie-react-native"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -3584,6 +3611,8 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 75b671f9e551e4c49153d4c4f8659ef4f559b970
   hermes-engine: b417d2b2aee3b89b58e63e23a51e02be91dc876d
   leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
+  lottie-ios: a881093fab623c467d3bce374367755c272bdd59
+  lottie-react-native: 5309780799ecf0bc55f14755401ba2658514f235
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   RCT-Folly: 36fe2295e44b10d831836cc0d1daec5f8abcf809
   RCTDeprecation: b2eecf2d60216df56bc5e6be5f063826d3c1ee35
@@ -3652,7 +3681,7 @@ SPEC CHECKSUMS:
   RNFBApp: 526e8bbb0d358b95c3068bc4c26ceb43a34f467d
   RNFBAuth: 6a452581dfe300754011203b4a10cb1d2d177b60
   RNFBFirestore: 3ff7c559fef570b2546c03129d7b7ab5b8fba8ff
-  RNGestureHandler: 0a16f3f13829c01268ae55610a40b57b713c8161
+  RNGestureHandler: 433f2680b512ab94fe82e014365ea8785de09c4d
   RNReanimated: c9f295fb1679867288d238bfaf3ea39225c95e1b
   RNScreens: f49acd952ee8e2fac659bf74166271654a20172b
   RNSVG: 05776cf3f0d52d3f8e7ebee34b2189da7b8638ff
