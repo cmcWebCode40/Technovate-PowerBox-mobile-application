@@ -70,6 +70,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
     sizeStyle[size],
     pressed && baseStyle.buttonPressed,
     disabled && baseStyle.disabled,
+    loading && baseStyle.buttonPressed,
     style,
   ];
 

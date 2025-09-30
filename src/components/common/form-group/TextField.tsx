@@ -31,7 +31,7 @@ const styles = (theme: Theme) => {
           paddingVertical: pixelSizeVertical(14),
         },
         android: {
-          paddingVertical: pixelSizeVertical(10),
+          paddingVertical: pixelSizeVertical(16),
         },
       }),
     },
