@@ -8,7 +8,7 @@ export const WireLessIcon: React.FunctionComponent<SvgIconProps> = ({
   size = '35',
 }) => {
   return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none">
+    <Svg width={size} height={size} viewBox={`0 0  35 35`} fill="none">
       <Path
         d="M18.35 12.8679L14.95 17.9679H20.05L16.65 23.0679"
         stroke={color}

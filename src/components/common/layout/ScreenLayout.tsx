@@ -3,6 +3,7 @@ import React from 'react';
 import {Theme} from '@/libs/config/theme';
 import {pixelSizeHorizontal, pixelSizeVertical} from '@/libs/utils';
 import {useThemedStyles} from '@/libs/hooks';
+import VideoBackground from './VideoBackground';
 
 interface ScreenLayoutProps {
   style?: StyleProp<ViewStyle>;
@@ -14,7 +15,12 @@ export const ScreenLayout: React.FunctionComponent<ScreenLayoutProps> = ({
   children,
 }) => {
   const baseStyle = useThemedStyles(styles);
-  return <View style={[baseStyle.container, style]}>{children}</View>;
+  return (
+    <View style={[baseStyle.container, style]}>
+      <VideoBackground />
+      {children}
+    </View>
+  );
 };
 
 const styles = ({colors}: Theme) => {
@@ -22,16 +28,16 @@ const styles = ({colors}: Theme) => {
     container: {
       flex: 1,
       ...Platform.select({
-        ios:{
+        ios: {
           paddingTop: '15%',
         },
-        android:{
+        android: {
           paddingTop: '5%',
-        }
+        },
       }),
+      backgroundColor: colors.black[100],
       paddingBottom: pixelSizeVertical(16),
       paddingHorizontal: pixelSizeHorizontal(16),
-      backgroundColor: colors.black[100],
     },
   });
 };
