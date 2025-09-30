@@ -14,6 +14,7 @@ import transactionService from '@/libs/server/Transaction';
 import { showMessage } from 'react-native-flash-message';
 import { ScreenLayout } from '@/components/common/layout';
 import { useSmartInverterChannel } from '@/libs/hooks/useSmartInverterChannel';
+import VideoBackground from '@/components/common/layout/VideoBackground';
 
 export const DevicesScreen: React.FunctionComponent = () => {
   const [paidAmount] = useState<string|undefined>(undefined);
@@ -25,44 +26,20 @@ export const DevicesScreen: React.FunctionComponent = () => {
 
   const cells: {title: string; value: string}[] = [
     {
-      title: 'Cell 1',
-      value: `${inverterReading?.cell1?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Cell 2',
-      value: `${inverterReading?.cell2?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Cell 3',
-      value: `${inverterReading?.cell2?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Cell 4',
-      value: `${inverterReading?.cell4?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Battery RCC',
-      value: `${inverterReading?.battRCC?.toFixed(2)} mAh`,
-    },
-    {
-      title: 'Battery FCC',
-      value: `${inverterReading?.battFCC?.toFixed(2)} mAh`,
-    },
-    {
       title: 'Battery Current',
-      value: `${inverterReading?.chargeCurrent?.toFixed(2)} A`,
+      value: `${inverterReading?.cc?.toFixed(2)} A`,
     },
     {
       title: 'Battery Health',
-      value: `${inverterReading?.battHealth?.toFixed(2)}%`,
+      value: `${inverterReading?.bh?.toFixed(2)}%`,
     },
     {
       title: 'Battery %',
-      value: `${inverterReading?.battPercent?.toFixed(2)}%`,
+      value: `${inverterReading?.bp?.toFixed(2)}%`,
     },
     {
       title: 'Battery Volt',
-      value: `${inverterReading?.battVolt?.toFixed(2)} V`,
+      value: `${inverterReading?.bv?.toFixed(2)} V`,
     },
   ];
 
@@ -84,15 +61,16 @@ export const DevicesScreen: React.FunctionComponent = () => {
 
   return (
     <ScreenLayout style={style.container}>
+      <VideoBackground/>
       <ScrollView style={style.content} showsVerticalScrollIndicator={false}>
         <DevicePlanOverviewCard paidAmount={paidAmount} />
         <View style={style.details}>
           <EnergyDeviceCard
             socketNo={user?.powerBoxId}
-            power={String(energyMetric.usage)}
-            upsFlag={inverterReading.upsFlag}
-            balance={inverterReading.balUnit}
-            voltage={inverterReading.battVolt}
+            power={(energyMetric.usg)}
+            upsFlag={false}
+            balance={inverterReading.bu}
+            voltage={inverterReading.bv}
             upsFlagHandler={()=>{
               if (connectivity.deviceStatus === 'offline') {
                 showMessage({
@@ -102,7 +80,7 @@ export const DevicesScreen: React.FunctionComponent = () => {
                 });
                 return;
               }
-              toggleUpsMode(inverterReading.upsFlag);
+              toggleUpsMode(false);
             }}
           />
           <View style={style.infoContainer}>
