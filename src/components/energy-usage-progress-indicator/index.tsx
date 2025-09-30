@@ -1,9 +1,12 @@
-import React from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React, {useRef} from 'react';
 import {Typography, WireLessIcon} from '../common';
-import {StyleSheet, View} from 'react-native';
+import {Dimensions, StyleSheet, View} from 'react-native';
 import {Theme, theme as themes} from '@/libs/config/theme';
 import {useThemedStyles} from '@/libs/hooks';
 import {fontPixel, pixelSizeHorizontal} from '@/libs/utils';
+import LottieView from 'lottie-react-native';
+import Video from 'react-native-video';
 
 interface EnergyUsageProgressIndicatorProps {
   invertColor?: boolean;
@@ -18,16 +21,23 @@ export const EnergyUsageProgressIndicator: React.FunctionComponent<
     colors: {orange, green},
   } = themes;
   const wirelessColor = invertColor ? orange[400] : green[300];
+  const animation = useRef<LottieView>(null);
 
   return (
-    <View style={style.content}>
-      <WireLessIcon color={wirelessColor}  size={40}/>
-      <Typography style={style.progressTitle} variant="h1">
-        {balance} unit
-      </Typography>
-      <Typography variant="b1" style={style.tag}>
-        Energy Balance
-      </Typography>
+    <View
+      style={{
+        justifyContent: 'flex-start',
+        marginLeft: -40,
+      }}>
+      <Video
+        source={require('../../../assets/powerbox-animation/powerBox_all_on.mp4')}
+        style={style.backgroundVideo}
+        muted={true}
+        repeat={true}
+        resizeMode="cover"
+        rate={1.0}
+        ignoreSilentSwitch="obey"
+      />
     </View>
   );
 };
@@ -49,11 +59,8 @@ const styles = (theme: Theme) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      height: 250,
-      width: 250,
       borderRadius: theme.radius.full,
       backgroundColor: 'transparent',
-      // borderWidth: 4,
       borderColor: theme.colors.black[300],
       paddingHorizontal: pixelSizeHorizontal(20),
       shadowOffset: {
@@ -72,7 +79,7 @@ const styles = (theme: Theme) => {
     tag: {
       textAlign: 'center',
       fontWeight: '600',
-      fontFamily:theme.fonts.ManropeSemibold,
+      fontFamily: theme.fonts.ManropeSemibold,
       fontSize: fontPixel(theme.fontSize.l),
       color: theme.colors.white[100],
     },
@@ -80,6 +87,10 @@ const styles = (theme: Theme) => {
       textAlign: 'center',
       color: theme.colors.white[100],
       fontSize: fontPixel(theme.fontSize.xxxl),
+    },
+    backgroundVideo: {
+      width: Dimensions.get('window').width,
+      height: 300,
     },
   });
 };
