@@ -5,6 +5,7 @@ import {DeviceRealTimeInfo, DeviceStatus, PublishResponse} from '../mqtt/types';
 import {showMessage} from 'react-native-flash-message';
 import transactionService from '../server/Transaction';
 import mqtt from 'mqtt';
+import { Config } from '../config/keys';
 
 type LoadingState = {
   isRecharging: boolean;
@@ -12,31 +13,26 @@ type LoadingState = {
   isUpsLoading: boolean;
 };
 
-export const defaultDeviceInfo = {
-  battVolt: 0,
-  cell1: 0,
-  cell2: 0,
-  cell3: 0,
-  cell4: 0,
-  balUnit: 0,
-  solarVoltage: 0,
-  solarCurrent: 0,
-  acOut: 0,
-  acVolt: 0,
-  chargeCurrent: 0,
-  battPercent: 0,
-  state: 'off',
-  upsFlag: false,
-  battHealth: 0,
-  battRCC: 0,
-  chargeCycles: 0,
-  usage: 0,
-  battFCC:0,
-  mode: '-----',
-  deviceId: '-----',
-  deviceState: '----',
-} as DeviceRealTimeInfo;
-
+export const defaultDeviceRealTimeInfo: DeviceRealTimeInfo = {
+  bv: 0, // Battery Voltage
+  bp: 0, // Battery Power
+  bu: 0, // Battery Usage
+  tu: 0, // Total Usage
+  bh: 0, // Battery Health
+  sv: 0, // System Voltage
+  sc: 0, // System Current
+  av: 0, // Average Voltage
+  pw: 0, // Power
+  pf: 0, // Power Factor
+  frq: 0, // Frequency
+  cc: 0, // Charge Current
+  st: 'off', // Status: 'off', 'lock', 'on', or 'charging'
+  md: false, // Mode (boolean)
+  id: 0, // Device ID
+  ds: 0, // Device Status
+  fw: '0', // Firmware Version
+  usg: 0,
+};
 const defaultLoadingState = {
   isRecharging: false,
   isToggling: false,
@@ -53,7 +49,7 @@ type TCreateContext = {
 };
 
 export const MqttContext = createContext<TCreateContext>({
-  deviceReading: defaultDeviceInfo,
+  deviceReading: defaultDeviceRealTimeInfo,
   loadingState: defaultLoadingState,
   devicePowerControl: async () => undefined,
   deviceUnitTopUp: async () => undefined,
@@ -72,7 +68,7 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
   children,
 }) => {
   const [deviceReading, setDeviceReading] =
-    useState<DeviceRealTimeInfo>(defaultDeviceInfo);
+    useState<DeviceRealTimeInfo>(defaultDeviceRealTimeInfo);
   const {isAuthenticated, user} = useAuthContext();
   const [connectivity, setConnectivity] = useState<DeviceStatus>({
     deviceStatus: 'offline',
@@ -91,26 +87,20 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
   const UPS_MODE_PUBLISH_TOPIC = `POWERBOX/CONFIG/${user?.powerBoxId}`;
 
   useEffect(() => {
-    let timeOutHandler: NodeJS.Timeout;
     const username = 'admin';
     const password = '12345678';
 
     if (!isAuthenticated) {
       return;
     }
-
     if (username && password && user?.isDeviceLinked && user?.powerBoxId) {
-      const host = 'x7cb07b8.ala.eu-central-1.emqxsl.com';
-      const path = '/mqtt';
-      let port = '8084';
-      let protocol = 'wss';
-      console.log('============CONNECTION========================');
-      console.log(`${protocol}://${host}:${port}${path}`);
-      console.log('====================================');
-      const client = mqtt.connect(`${protocol}://${host}:${port}${path}`, {
+    const mqttConfig =  Config.mqtt;
+    const mqTTUrl = `${mqttConfig.protocol}://${mqttConfig.host}:${mqttConfig.port}${mqttConfig.path}`;
+    console.log(mqTTUrl);
+      const client = mqtt.connect(mqTTUrl, {
       clientId: `CLIENT_${user?.powerBoxId}`,
-      username:'emqx_online_test_018094ea',
-      password: '87a6B2027D163!5bfL!98T3559Jaa667',
+      username: mqttConfig.username,
+      password: mqttConfig.password,
       reconnectPeriod:1000,
       connectTimeout: 30 * 1000,
       })
@@ -126,7 +116,7 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
       })
       .on('disconnect', () => {
         console.log('Disconnected');
-        setDeviceReading(defaultDeviceInfo)
+        setDeviceReading(defaultDeviceRealTimeInfo);
       })
       .on('offline', () => {
         console.log('Offline');
@@ -138,29 +128,32 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
         console.log('Disconnected');
       })
       .on('message', async (topic, data) => {
+          console.log(
+            `Message received: ${data} on topic ${topic} MQTTX`,
+          );
         if (topic === READING_TOPIC) {
           const parsedMessage = JSON.parse(
             data?.toString(),
           ) as DeviceRealTimeInfo;
           setDeviceReading(parsedMessage);
-          console.log(
-            `Message received: ${data} on topic ${topic} MQTTX`,
-          );
+          // console.log(
+          //   `Message received: ${data} on topic ${topic} MQTTX`,
+          // );
         }
         if (topic === STATUS_TOPIC) {
           const parsedConnectivity = JSON.parse(
             data?.toString(),
           ) as DeviceStatus;
           setConnectivity(parsedConnectivity);
-          console.log(
-            `Message received: ${data} on topic ${topic} MQTTX`,
-          );
+          // console.log(
+          //   `Message received: ${data} on topic ${topic} MQTTX`,
+          // );
         }
         if (topic === RESPONSE_TOPIC) {
           const parsedResponse = JSON.parse(
             data?.toString(),
           ) as PublishResponse;
-  
+
           if (
             parsedResponse.type === 'wallet recharge' &&
             parsedResponse.msg === 'successful'
@@ -197,20 +190,19 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
     }
 
     return () => {
-      clearTimeout(timeOutHandler);
-      // mqttClient?.off('connect',()=>{});
-      // mqttClient?.off('connect',()=>{});
-      // mqttClient?.off('connect',()=>{});
-      // mqttClient?.off('connect',()=>{});
-      // mqttClient?.off('connect',()=>{});
-      // mqttClient?.off('connect',()=>{});
-      // mqttClient?.off('connect',()=>{});
+      mqttClient?.off('connect',()=>{});
+      mqttClient?.off('reconnect', ()=>{});
+      mqttClient?.off('offline', ()=>{});
+      mqttClient?.off('disconnect',()=>{});
+      mqttClient?.off('message',()=>{});
+      mqttClient?.off('error',()=>{});
+      mqttClient?.off('close',()=>{});
     };
   }, [READING_TOPIC, RESPONSE_TOPIC, STATUS_TOPIC, isAuthenticated, pendingTopUpReference, user?.isDeviceLinked, user?.powerBoxId]);
 
   const devicePowerControl = async () => {
-    console.log(deviceReading.state, 'STATE===');
-    if (deviceReading.state === 'charging') {
+    console.log(deviceReading.st, 'STATE===');
+    if (deviceReading.st === 'charging') {
       showMessage({
         position: 'top',
         message: 'Device currently Charging',
@@ -219,7 +211,7 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
 
       return;
     }
-    if (deviceReading.state === 'lock') {
+    if (deviceReading.st === 'lock') {
       showMessage({
         position: 'top',
         message: 'Device currently LOCKED contact Admin',
@@ -227,7 +219,7 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
       });
       return;
     }
-    const command = deviceReading.state === 'off' ? 'on' : 'off';
+    const command = deviceReading.st === 'off' ? 'on' : 'off';
     try {
       const payload = JSON.stringify({
         id: user?.powerBoxId,
@@ -237,7 +229,7 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
       if (user?.powerBoxId) {
         mqttClient?.publish(CONTORL_PUBLISH_TOPIC, payload);
       }
-    } catch (error) {
+    } catch {
       Alert.alert('An Error occurred control device power');
     } finally {
       setLoadingState(state => ({...state, isToggling: false}));
@@ -257,7 +249,7 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
          mqttClient?.publish(TOP_UP_PUBLISH_TOPIC, payload);
         setPendingTopUpReference(reference);
       }
-    } catch (error) {
+    } catch  {
       Alert.alert('An Error recharging up your device, please try again');
     } finally {
       setLoadingState(state => ({...state, isRecharging: false}));
@@ -273,9 +265,9 @@ export const MqttProvider: React.FunctionComponent<MqttProviderProps> = ({
       });
       setLoadingState(state => ({...state, isUpsLoading: true}));
       if (user?.powerBoxId) {
-        await mqttClient?.publish(UPS_MODE_PUBLISH_TOPIC, payload);
+        mqttClient?.publish(UPS_MODE_PUBLISH_TOPIC, payload);
       }
-    } catch (error) {
+    } catch {
       Alert.alert('An Error recharging up your device, please try again');
     } finally {
       setLoadingState(state => ({...state, isUpsLoading: false}));
