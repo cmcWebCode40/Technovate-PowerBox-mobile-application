@@ -12,6 +12,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackScreens} from '@/navigation/type';
 import {useNavigation} from '@react-navigation/native';
 import { ScreenLayout } from '@/components/common/layout';
+import { SheetManager } from 'react-native-actions-sheet';
 
 export const OfflineScreen: React.FunctionComponent = () => {
   const style = useThemedStyles(styles);
@@ -22,7 +23,7 @@ export const OfflineScreen: React.FunctionComponent = () => {
     useNavigation<NativeStackNavigationProp<MainStackScreens>>();
 
   const connectBle = () => {
-    navigation.navigate('AddDevice');
+    SheetManager.show('bluetooth-connect-sheet');
   };
 
   const disconnect = () => {
