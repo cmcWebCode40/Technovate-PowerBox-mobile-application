@@ -1,20 +1,40 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import {showMessage} from 'react-native-flash-message';
 import {byteToString} from '../utils/binaryFormatters';
 import BleManager, {
   BleManagerDidUpdateValueForCharacteristicEvent,
+  BleScanCallbackType,
+  BleScanMatchMode,
+  BleScanMode,
   Peripheral,
 } from 'react-native-ble-manager';
 import {Alert, Linking, PermissionsAndroid, Platform} from 'react-native';
-import {DeviceRealTimeInfo} from '../mqtt/types';
-import {defaultDeviceInfo} from './MqttContext';
+import {DeviceActionResponse, DeviceRealTimeInfo} from '../mqtt/types';
+import {defaultDeviceRealTimeInfo} from './MqttContext';
 import {TextEncoder} from 'text-encoding';
+import {
+  deleteFromAsyncStore,
+  getFromAsyncStore,
+  requestAndroidPermissionsForBluetooth,
+  saveToAsyncStore,
+} from '../utils';
 
 const DEVICE_SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
 const TRANSFER_CHARACTERISTIC_UUID = 'beb5483f-36e1-4688-b7f5-ea07361b26a9';
 const RECEIVE_CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
 const METER_READING_CHARACTERISTIC_UUID =
   'beb5483e-36e2-4688-b7f5-ea07361b26a8';
+
+const SECONDS_TO_SCAN_FOR = 3;
+const SERVICE_UUIDS: string[] = [];
+const ALLOW_DUPLICATES = true;
 
 type LoadingState = {
   isRecharging: boolean;
@@ -27,14 +47,16 @@ type DefaultContext = {
   stopScan: () => void;
   isPairing: boolean;
   isScanning: boolean;
+  isConnected?: boolean;
   loadLimit?: string;
   loadingState: LoadingState;
   addLoadLimit: (limit: string) => void;
+  sendOTA: (ota: string) => Promise<void>;
   scanAvailableDevices: () => void;
   energyMetric: DeviceRealTimeInfo;
   peripherals: Map<string, Peripheral>;
   characteristics?: PeripheralServices;
-  connectPeripheral: (peripheral: Peripheral) => Promise<boolean>;
+  connectPeripheral: (peripheral: Peripheral, reconnect?:boolean) => Promise<void>;
   devicePowerControl: (deviceId: string) => void;
   topUp: (deviceId: string, reference: string, amount: string) => Promise<void>;
   disconnectPeripheral: (peripheralId: string) => void;
@@ -93,22 +115,24 @@ export type BleResponse = {
   msg: string;
   id: string;
 };
-
+export const CONNECTED_BLUETOOTH_DEVICE = 'connected_bluetooth_device';
 export const BluetoothContext = createContext<DefaultContext>({
   read: async () => [],
   write: async () => undefined,
   stopScan: () => undefined,
   isPairing: false,
   isScanning: false,
-  energyMetric: defaultDeviceInfo,
+  isConnected: false,
+  energyMetric: defaultDeviceRealTimeInfo,
   loadLimit: undefined,
   loadingState: defaultLoadingState,
   addLoadLimit: () => undefined,
+  sendOTA: async () => undefined,
   peripherals: new Map<Peripheral['id'], Peripheral>(),
   characteristics: undefined,
   devicePowerControl: () => undefined,
   topUp: async () => undefined,
-  connectPeripheral: async () => false,
+  connectPeripheral: async () => undefined,
   disconnectPeripheral: () => undefined,
   scanAvailableDevices: () => undefined,
   setupWifi: async () => undefined,
@@ -117,11 +141,11 @@ export const BluetoothContext = createContext<DefaultContext>({
 export const BluetoothContextProvider: React.FunctionComponent<
   BluetoothContextProvider
 > = ({children}) => {
-  //  From thing speak API
   const [energyMetric, setEnergyMetric] =
-    useState<DeviceRealTimeInfo>(defaultDeviceInfo);
+    useState<DeviceRealTimeInfo>(defaultDeviceRealTimeInfo);
   const [isScanning, setIsScanning] = useState(false);
   const [isPairing, setIsPairing] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [peripherals, setPeripherals] = useState<Map<string, Peripheral>>(
     new Map<Peripheral['id'], Peripheral>(),
   );
@@ -187,16 +211,14 @@ export const BluetoothContextProvider: React.FunctionComponent<
       data.characteristic,
     );
     if (data.characteristic === METER_READING_CHARACTERISTIC_UUID) {
-      const readings = JSON.parse(byteToString(response)) as DeviceRealTimeInfo;
-      console.log(readings, 'DATA');
-
+      const readings = JSON.parse(byteToString(response)) as DeviceActionResponse;
       setEnergyMetric(prevReadings => ({...prevReadings, ...readings}));
     }
 
     if (data.characteristic === RECEIVE_CHARACTERISTIC_UUID) {
       const formatted = JSON.parse(
         byteToString(response),
-      ) as DeviceRealTimeInfo;
+      ) as DeviceActionResponse;
       if (formatted.type === 'device on' || formatted.type === 'device off') {
         await sleep(1200);
         setEnergyMetric(prevReadings => ({
@@ -219,10 +241,6 @@ export const BluetoothContextProvider: React.FunctionComponent<
     const regex = /\bpb_\d{13}\b/i;
     const localName = peripheral.advertising?.localName;
     if (localName && regex.test(localName)) {
-      console.info(
-        `Found match for "${regex}" in localName`,
-        peripheral.advertising.serviceUUIDs,
-      );
       setPeripherals(map => {
         return new Map(map.set(peripheral.id, peripheral));
       });
@@ -251,6 +269,22 @@ export const BluetoothContextProvider: React.FunctionComponent<
       }
     }
   };
+
+  useEffect(() => {
+    requestAndroidPermissionsForBluetooth().then(async () => {
+      BleManager.start({showAlert: false}).then(async () => {
+        const state = await BleManager.checkState();
+        if (state === 'on') {
+          const savedConnectedPeripheral = await getFromAsyncStore<Peripheral>(
+            CONNECTED_BLUETOOTH_DEVICE,
+          );
+          if (savedConnectedPeripheral) {
+            await connectPeripheral(savedConnectedPeripheral, true);
+          }
+        }
+      });
+    });
+  }, []);
 
   useEffect(() => {
     handleAndroidPermissions();
@@ -284,23 +318,16 @@ export const BluetoothContextProvider: React.FunctionComponent<
       stopScanListener.remove();
       listenedForDisconnection.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [characteristics]);
 
   const handleDisconnections = () => {
     setCharacteristics(undefined);
     setPeripherals(new Map());
-    setEnergyMetric(defaultDeviceInfo);
+    setEnergyMetric(defaultDeviceRealTimeInfo);
     setLoadingState(defaultLoadingState);
   };
 
   const scanAvailableDevices = async () => {
-    if (Platform.OS === 'android') {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-      );
-    }
-    setPeripherals(new Map());
     const state = await BleManager.checkState();
     if (state === 'off') {
       if (Platform.OS === 'ios') {
@@ -322,65 +349,81 @@ export const BluetoothContextProvider: React.FunctionComponent<
       }
     }
     if (!isScanning) {
-      BleManager.scan([], 3)
-        .then(() => {
-          setIsScanning(true);
-        })
-        .catch(error => {
-          showMessage({
-            message: error?.toString(),
-            type: 'danger',
-          });
-        });
+      setPeripherals(new Map<Peripheral['id'], Peripheral>());
+      setIsScanning(true);
+      BleManager.scan(SERVICE_UUIDS, SECONDS_TO_SCAN_FOR, ALLOW_DUPLICATES, {
+        matchMode: BleScanMatchMode.Sticky,
+        scanMode: BleScanMode.LowLatency,
+        callbackType: BleScanCallbackType.AllMatches,
+      });
     }
   };
 
-  const connectPeripheral = async (peripheral: Peripheral) => {
-    try {
-      setIsPairing(true);
-      if (peripheral) {
-        await BleManager.connect(peripheral.id);
-        await sleep(900);
-        const peripheralData = await BleManager.retrieveServices(peripheral.id);
-        if (peripheralData.characteristics) {
-          const response = {
-            peripheralId: peripheral.id,
-            serviceId: DEVICE_SERVICE_UUID,
-            transfer: TRANSFER_CHARACTERISTIC_UUID,
-            receive: RECEIVE_CHARACTERISTIC_UUID,
-            meterInfoReading: METER_READING_CHARACTERISTIC_UUID,
-          };
-          // await BleManager.requestMTU(response.peripheralId, 255);
-          // await BleManager.startNotification(
-          //   response.peripheralId,
-          //   response.serviceId,
-          //   response.meterInfoReading,
-          // );
-          setCharacteristics(response);
+  const connectPeripheral = useCallback(
+    async (peripheral: Peripheral, reconnect?: boolean) => {
+      try {
+        setIsPairing(true);
+        if (peripheral) {
+          await BleManager.connect(peripheral.id);
+          setPeripherals(map => {
+            let p = map.get(peripheral.id);
+            if (p) {
+              p.connecting = false;
+              p.connected = true;
+              return new Map(map.set(p.id, p));
+            }
+            return map;
+          });
+          await sleep(900);
+          const peripheralData = await BleManager.retrieveServices(
+            peripheral.id,
+          );
+          if (peripheralData.characteristics) {
+            const response = {
+              peripheralId: peripheral.id,
+              serviceId: DEVICE_SERVICE_UUID,
+              transfer: TRANSFER_CHARACTERISTIC_UUID,
+              receive: RECEIVE_CHARACTERISTIC_UUID,
+              meterInfoReading: METER_READING_CHARACTERISTIC_UUID,
+            };
+            // await BleManager.requestMTU(response.peripheralId, 255);
+            await BleManager.startNotification(
+              response.peripheralId,
+              response.serviceId,
+              response.meterInfoReading,
+            );
+            setCharacteristics(response);
+            saveToAsyncStore(CONNECTED_BLUETOOTH_DEVICE, peripheral);
+            setIsConnected(true);
+            setIsPairing(false);
+            if (!reconnect) {
+              showMessage({
+                message: 'Smart Meter Connected Successfully.',
+                type: 'success',
+              });
+            }
+          }
+        }
+      } catch {
+        deleteFromAsyncStore(CONNECTED_BLUETOOTH_DEVICE);
+        if (!reconnect) {
           showMessage({
-            message: `Connected to ${peripheral.name ?? peripheral.id} `,
-            type: 'success',
-            position: 'bottom',
+            message: 'Smart Meter failed to connect.',
+            type: 'danger',
           });
         }
+      } finally {
+        setIsPairing(false);
       }
-      return true;
-    } catch (error) {
-      showMessage({
-        message: `[connectPeripheral][${peripheral.id}] connectPeripheral error  ${error}`,
-        type: 'danger',
-      });
-      return false;
-    } finally {
-      setIsPairing(false);
-    }
-  };
+    },
+    [],
+  );
 
   const disconnectPeripheral = async (peripheralId: string) => {
     await BleManager.disconnect(peripheralId);
     setCharacteristics(undefined);
     setPeripherals(new Map());
-    setEnergyMetric(defaultDeviceInfo);
+    setEnergyMetric(defaultDeviceRealTimeInfo);
     setLoadingState(defaultLoadingState);
     showMessage({
       message: 'Disconnected successfully',
@@ -422,7 +465,7 @@ export const BluetoothContextProvider: React.FunctionComponent<
 
   const devicePowerControl = async (deviceId: string) => {
     if (characteristics) {
-      const command = energyMetric.state === 'off' ? 'on' : 'off';
+      const command = energyMetric.st === 'off' ? 'on' : 'off';
       try {
         const data = {
           type: 'control',
@@ -500,6 +543,16 @@ export const BluetoothContextProvider: React.FunctionComponent<
     }
   };
 
+    const sendOTA = async (otaPayload: string) => {
+    console.log('Starting OTA with payload size:', JSON.parse(otaPayload));
+    if (characteristics) {
+        const encoder = new TextEncoder();
+        const dataBytes = encoder.encode(otaPayload);
+        const dataArray = Array.from(dataBytes);
+        await write(dataArray, characteristics);
+    }
+  };
+
   const contextValues = {
     read,
     write,
@@ -512,7 +565,9 @@ export const BluetoothContextProvider: React.FunctionComponent<
     addLoadLimit,
     loadingState,
     topUp,
+    sendOTA,
     setupWifi,
+    isConnected,
     characteristics,
     connectPeripheral,
     devicePowerControl,
